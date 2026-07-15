@@ -1,0 +1,275 @@
+/* ==========================================================================
+   VitePress 殿堂级 UI 与色彩美化方案 (Masterpiece Theme Edition)
+   ========================================================================== */
+
+/* 引入 Google Fonts 极简现代字体 */
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
+
+:root {
+  /* 字体系统重构：主打现代、极简与高易读性 */
+  --vp-font-family-base: 'Outfit', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --vp-font-family-mono: 'JetBrains Mono', 'Fira Code', monospace;
+
+  /* 亮色模式：优雅湖水蓝 */
+  --vp-c-brand-1: #0284c7;
+  --vp-c-brand-2: #0ea5e9;
+  --vp-c-brand-3: #38bdf8;
+  
+  --vp-c-bg: #f8fafc;           /* 极淡优雅灰蓝 */
+  --vp-c-bg-soft: #ffffff;      /* 纯白卡片 */
+  --vp-c-bg-mute: #f1f5f9;      /* 代码块底色 */
+  --vp-c-bg-alt: #f8fafc;
+  
+  --vp-c-text-1: #0f172a;       /* 深石板灰 */
+  --vp-c-text-2: #475569;
+  --vp-c-text-3: #64748b;
+  --vp-c-divider: #e2e8f0;      /* 纤细边框 */
+  
+  --navbar-bg: rgba(248, 250, 252, 0.8);
+  --sidebar-bg: rgba(248, 250, 252, 0.8);
+}
+
+/* ==========================================================================
+   暗色模式：极光太空深空蓝 (The Deep Space Aurora)
+   ========================================================================== */
+.dark {
+  /* 背景色：选用纯正的星云太空蓝，深邃且透亮，对比度极佳 */
+  --vp-c-bg: #090e1a;           /* 曜夜蓝 */
+  --vp-c-bg-soft: #111a2e;      /* 卡片与侧边栏 */
+  --vp-c-bg-mute: #16223b;      /* 代码块底色 */
+  --vp-c-bg-alt: #090e1a;
+  
+  /* 文本颜色：高易读性护眼调色 */
+  --vp-c-text-1: #f8fafc;       /* 象牙白正文 */
+  --vp-c-text-2: #94a3b8;       /* 灰蓝辅助字 */
+  --vp-c-text-3: #475569;       
+  
+  /* 边框色：极其纤细的极光冰蓝半透明线条 */
+  --vp-c-divider: rgba(56, 189, 248, 0.08);
+
+  /* 极光冰川蓝高亮 */
+  --vp-c-brand-1: #38bdf8;
+  --vp-c-brand-2: #7dd3fc;
+  --vp-c-brand-3: #0ea5e9;
+
+  --navbar-bg: rgba(9, 14, 26, 0.8);
+  --sidebar-bg: rgba(9, 14, 26, 0.85);
+  
+  /* 代码块中高亮行的背景色 */
+  --vp-code-line-highlight-color: rgba(56, 189, 248, 0.08);
+}
+
+/* ==========================================================================
+   UI 核心细节美化样式
+   ========================================================================== */
+
+/* 1. 毛玻璃毛刺感导航栏 (Glassmorphism) */
+.VPNavBar {
+  background-color: var(--navbar-bg) !important;
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-bottom: 1px solid var(--vp-c-divider) !important;
+}
+
+/* 2. 毛玻璃侧边栏 */
+.VPSidebar {
+  background-color: var(--sidebar-bg) !important;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-right: 1px solid var(--vp-c-divider) !important;
+}
+
+/* 3. 侧边栏列表美化：优雅胶囊丸 (Pill active state) */
+.VPSidebarItem .link {
+  padding: 6px 12px !important;
+  border-radius: 8px;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.VPSidebarItem .link:hover {
+  color: var(--vp-c-brand-1) !important;
+  background: rgba(56, 189, 248, 0.05);
+}
+
+/* 侧边栏当前激活的文章高亮态 */
+.VPSidebarItem .link.active {
+  color: var(--vp-c-brand-1) !important;
+  background: rgba(56, 189, 248, 0.08) !important;
+  font-weight: 600;
+  box-shadow: inset 3px 0 0 var(--vp-c-brand-1); /* 左侧发光小竖线 */
+}
+
+/* 4. 精美行内代码块 (Stripe Style inline code) */
+:not(pre) > code {
+  font-family: var(--vp-font-family-mono);
+  font-size: 0.88em;
+  color: var(--vp-c-brand-1) !important;
+  background-color: rgba(56, 189, 248, 0.06) !important;
+  border: 1px solid rgba(56, 189, 248, 0.15) !important;
+  padding: 3px 6px !important;
+  border-radius: 6px !important;
+  transition: all 0.2s ease;
+}
+
+/* 5. 主文章区域排版美化 (Typography) */
+.vp-doc {
+  letter-spacing: 0.01em;
+  line-height: 1.75;
+}
+
+.vp-doc h1, .vp-doc h2, .vp-doc h3, .vp-doc h4 {
+  font-family: 'Outfit', var(--vp-font-family-base);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+/* 文章中的链接添加下划线微动效 */
+.vp-doc a {
+  text-decoration: none;
+  font-weight: 500;
+  border-bottom: 1.5px dashed rgba(56, 189, 248, 0.4);
+  transition: all 0.2s ease;
+}
+
+.vp-doc a:hover {
+  color: var(--vp-c-brand-1);
+  border-bottom-style: solid;
+  border-bottom-color: var(--vp-c-brand-1);
+}
+
+/* 引用块 (Blockquote) 优雅重置 */
+.vp-doc blockquote {
+  border-left: 4px solid var(--vp-c-brand-1) !important;
+  background-color: rgba(56, 189, 248, 0.03) !important;
+  color: var(--vp-c-text-2) !important;
+  padding: 12px 20px !important;
+  border-radius: 0 8px 8px 0 !important;
+  font-style: normal !important;
+  margin: 24px 0 !important;
+}
+
+/* 自定义容器区块 (VitePress Alerts) 殿堂级微调 */
+.custom-block {
+  border-radius: 12px !important;
+  border-left-width: 4px !important;
+  padding: 16px 20px !important;
+  margin: 24px 0 !important;
+}
+
+.custom-block.info {
+  background-color: rgba(56, 189, 248, 0.04) !important;
+  border-color: #0ea5e9 !important;
+}
+.custom-block.tip {
+  background-color: rgba(16, 185, 129, 0.04) !important;
+  border-color: #10b981 !important;
+}
+.custom-block.warning {
+  background-color: rgba(245, 158, 11, 0.04) !important;
+  border-color: #f59e0b !important;
+}
+.custom-block.danger {
+  background-color: rgba(244, 63, 94, 0.04) !important;
+  border-color: #f43f5e !important;
+}
+
+/* 表格 (Tables) 极简重构 */
+.vp-doc table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 28px 0 !important;
+  font-size: 0.95em;
+  display: table !important;
+}
+
+.vp-doc th {
+  background-color: var(--vp-c-bg-mute) !important;
+  color: var(--vp-c-text-1) !important;
+  font-weight: 600;
+  border: 1px solid var(--vp-c-divider) !important;
+  padding: 10px 14px !important;
+}
+
+.vp-doc td {
+  border: 1px solid var(--vp-c-divider) !important;
+  padding: 10px 14px !important;
+  color: var(--vp-c-text-2);
+}
+
+.vp-doc tr:nth-child(even) {
+  background-color: rgba(56, 189, 248, 0.01) !important;
+}
+
+/* 键盘按键标签 (Keyboard tags) */
+.vp-doc kbd {
+  font-family: var(--vp-font-family-mono);
+  font-size: 0.82em;
+  color: var(--vp-c-text-1) !important;
+  background: var(--vp-c-bg-mute) !important;
+  border: 1px solid var(--vp-c-divider) !important;
+  border-bottom: 2px solid rgba(0, 0, 0, 0.15) !important;
+  box-shadow: 0 1px 0 rgba(0,0,0,0.05);
+  border-radius: 4px !important;
+  padding: 2px 5px !important;
+  margin: 0 2px;
+}
+.dark .vp-doc kbd {
+  border-bottom: 2px solid rgba(255, 255, 255, 0.15) !important;
+}
+
+/* 强文本 (Bold/Strong) 优雅着色 */
+.vp-doc strong {
+  color: var(--vp-c-text-1);
+  font-weight: 700;
+}
+.dark .vp-doc strong {
+  /* 粗体字稍微带一点冰蓝高亮，阅读时重点分明 */
+  color: #bae6fd;
+}
+
+/* 6. 自定义扁平化极光滚动条：加宽至 10px，增加对比度且采用悬浮药丸形态，方便鼠标拖拽 */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: rgba(2, 132, 199, 0.3) !important;
+  background-clip: padding-box !important;
+  border: 2.5px solid transparent !important; /* 创造边缘间距，使滑块显得更窄精致 */
+  border-radius: 99px !important;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(2, 132, 199, 0.6) !important;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background-color: rgba(56, 189, 248, 0.3) !important;
+  background-clip: padding-box !important;
+  border: 2.5px solid transparent !important;
+  border-radius: 99px !important;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(56, 189, 248, 0.65) !important;
+}
+
+/* 7. Markdown 中的数学公式排版优化 */
+.math {
+  overflow-x: auto;
+  padding: 12px 0;
+  color: var(--vp-c-text-1);
+}
+
+
+
+/* 9. 搜索框聚焦 (Search bar focus) 极光呼吸灯效果 */
+.DocSearch-Button:focus {
+  border-color: var(--vp-c-brand-1) !important;
+  box-shadow: 0 0 10px rgba(56, 189, 248, 0.2) !important;
+}

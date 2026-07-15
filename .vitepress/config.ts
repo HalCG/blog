@@ -44,7 +44,7 @@ function getArticlesInDir(dirRelativePath: string) {
     }
     
     // 在 Windows 系统下，path.join 会产生反斜杠，VitePress 需要正斜杠
-    const webLink = '/' + path.join(dirRelativePath, file.replace('.md', '')).replace(/\\/g, '/')
+    const webLink = ('/' + path.join(dirRelativePath, file.replace('.md', '')).replace(/\\/g, '/')).replace(/ /g, '%20')
     
     return {
       text: title,
@@ -61,7 +61,7 @@ function getArticlesInDir(dirRelativePath: string) {
   if (readme) {
     items.unshift({
       text: '导言 / 概览',
-      link: '/' + path.join(dirRelativePath, 'README').replace(/\\/g, '/')
+      link: ('/' + path.join(dirRelativePath, 'README').replace(/\\/g, '/')).replace(/ /g, '%20')
     })
   }
   
@@ -69,8 +69,8 @@ function getArticlesInDir(dirRelativePath: string) {
 }
 
 export default defineConfig({
-  title: '图形学与软件开发笔记',
-  description: 'C++ / OpenGL / VTK / 计算几何 / Qt / 设计模式',
+  title: 'Leo的个人空间',
+  description: 'C++ / OpenGL / VTK / 设计模式 / 读书笔记 / 生活与健康',
   
   // 使用当前文件夹（blog 根目录）作为源文件目录
   srcDir: '.',
@@ -97,16 +97,11 @@ export default defineConfig({
   },
 
   themeConfig: {
-    logo: { text: '💡', link: '/' },
-    siteTitle: '图形学 & 软件开发',
+    siteTitle: 'Leo的个人空间',
 
     // 头部导航栏
     nav: [
-      { text: '首页', link: '/' },
-      { text: 'OpenGL 应用', link: '/OpenGL应用/OpenGL 深度测试及Early-Z详解' },
-      { text: 'VTK 开发', link: '/pattern/vtk-observer-and-command-pattern' },
-      { text: 'Qt 与设计模式', link: '/pattern/qt/01-observer-signals-slots' },
-      { text: '设计模式基础', link: '/ljz-design-patterns/README' }
+      { text: '首页', link: '/' }
     ],
 
     // 侧边栏配置（左侧文章分类菜单）
@@ -114,7 +109,7 @@ export default defineConfig({
       '/': [
         {
           text: 'OpenGL 应用与原理',
-          collapsed: false,
+          collapsed: true,
           items: getArticlesInDir('OpenGL应用')
         },
         {
@@ -192,8 +187,8 @@ export default defineConfig({
 
     // 底部页脚
     footer: {
-      message: '基于 VitePress 强力驱动 | 零部署维护成本',
-      copyright: `Copyright © 2024-${new Date().getFullYear()} 个人技术博客`
+      message: '基于 VitePress 强力驱动 | 记录技术与生活',
+      copyright: `Copyright © 2024-${new Date().getFullYear()} Leo的个人空间`
     },
 
     // 大纲显示配置 (右侧目录)
