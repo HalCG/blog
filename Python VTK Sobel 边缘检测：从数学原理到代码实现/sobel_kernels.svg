@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="520" viewBox="0 0 960 520">
+  <style>
+    .title { font: bold 18px sans-serif; fill: #222; }
+    .label { font: 14px sans-serif; fill: #333; }
+    .cell { stroke: #444; stroke-width: 1.5; }
+    .txt { font: bold 16px sans-serif; fill: #111; text-anchor: middle; dominant-baseline: middle; }
+    .note { font: 12px sans-serif; fill: #666; }
+  </style>
+  <text x="480" y="28" text-anchor="middle" class="title">Sobel Operator: Derivative x Smoothing (Outer Product)</text>
+
+  <!-- Row 1 -->
+  <text x="120" y="58" text-anchor="middle" class="label">Dx = [-1, 0, 1]</text>
+  <rect x="40" y="70" width="50" height="50" fill="#d73027" class="cell"/><text x="65" y="95" class="txt">-1</text>
+  <rect x="95" y="70" width="50" height="50" fill="#f7f7f7" class="cell"/><text x="120" y="95" class="txt">0</text>
+  <rect x="150" y="70" width="50" height="50" fill="#4575b4" class="cell"/><text x="175" y="95" class="txt">1</text>
+
+  <text x="360" y="58" text-anchor="middle" class="label">Sy = [1, 2, 1]^T</text>
+  <rect x="330" y="70" width="50" height="50" fill="#fee08b" class="cell"/><text x="355" y="95" class="txt">1</text>
+  <rect x="330" y="125" width="50" height="50" fill="#fdae61" class="cell"/><text x="355" y="150" class="txt">2</text>
+  <rect x="330" y="180" width="50" height="50" fill="#fee08b" class="cell"/><text x="355" y="205" class="txt">1</text>
+
+  <text x="680" y="58" text-anchor="middle" class="label">Gx = Sy (x) Dx</text>
+  <g transform="translate(560,70)">
+    <rect x="0" y="0" width="50" height="50" fill="#d73027" class="cell"/><text x="25" y="25" class="txt">-1</text>
+    <rect x="55" y="0" width="50" height="50" fill="#f7f7f7" class="cell"/><text x="80" y="25" class="txt">0</text>
+    <rect x="110" y="0" width="50" height="50" fill="#4575b4" class="cell"/><text x="135" y="25" class="txt">1</text>
+    <rect x="0" y="55" width="50" height="50" fill="#d73027" class="cell"/><text x="25" y="80" class="txt">-2</text>
+    <rect x="55" y="55" width="50" height="50" fill="#f7f7f7" class="cell"/><text x="80" y="80" class="txt">0</text>
+    <rect x="110" y="55" width="50" height="50" fill="#4575b4" class="cell"/><text x="135" y="80" class="txt">2</text>
+    <rect x="0" y="110" width="50" height="50" fill="#d73027" class="cell"/><text x="25" y="135" class="txt">-1</text>
+    <rect x="55" y="110" width="50" height="50" fill="#f7f7f7" class="cell"/><text x="80" y="135" class="txt">0</text>
+    <rect x="110" y="110" width="50" height="50" fill="#4575b4" class="cell"/><text x="135" y="135" class="txt">1</text>
+  </g>
+
+  <!-- Row 2 -->
+  <text x="120" y="280" text-anchor="middle" class="label">Sx = [1, 2, 1]</text>
+  <rect x="40" y="292" width="50" height="50" fill="#fee08b" class="cell"/><text x="65" y="317" class="txt">1</text>
+  <rect x="95" y="292" width="50" height="50" fill="#fdae61" class="cell"/><text x="120" y="317" class="txt">2</text>
+  <rect x="150" y="292" width="50" height="50" fill="#fee08b" class="cell"/><text x="175" y="317" class="txt">1</text>
+
+  <text x="360" y="280" text-anchor="middle" class="label">Dy = [-1, 0, 1]^T</text>
+  <rect x="330" y="292" width="50" height="50" fill="#d73027" class="cell"/><text x="355" y="317" class="txt">-1</text>
+  <rect x="330" y="347" width="50" height="50" fill="#f7f7f7" class="cell"/><text x="355" y="372" class="txt">0</text>
+  <rect x="330" y="402" width="50" height="50" fill="#4575b4" class="cell"/><text x="355" y="427" class="txt">1</text>
+
+  <text x="680" y="280" text-anchor="middle" class="label">Gy = Sx (x) Dy</text>
+  <g transform="translate(560,292)">
+    <rect x="0" y="0" width="50" height="50" fill="#d73027" class="cell"/><text x="25" y="25" class="txt">-1</text>
+    <rect x="55" y="0" width="50" height="50" fill="#d73027" class="cell"/><text x="80" y="25" class="txt">-2</text>
+    <rect x="110" y="0" width="50" height="50" fill="#d73027" class="cell"/><text x="135" y="25" class="txt">-1</text>
+    <rect x="0" y="55" width="50" height="50" fill="#f7f7f7" class="cell"/><text x="25" y="80" class="txt">0</text>
+    <rect x="55" y="55" width="50" height="50" fill="#f7f7f7" class="cell"/><text x="80" y="80" class="txt">0</text>
+    <rect x="110" y="55" width="50" height="50" fill="#f7f7f7" class="cell"/><text x="135" y="80" class="txt">0</text>
+    <rect x="0" y="110" width="50" height="50" fill="#4575b4" class="cell"/><text x="25" y="135" class="txt">1</text>
+    <rect x="55" y="110" width="50" height="50" fill="#4575b4" class="cell"/><text x="80" y="135" class="txt">2</text>
+    <rect x="110" y="110" width="50" height="50" fill="#4575b4" class="cell"/><text x="135" y="135" class="txt">1</text>
+  </g>
+
+  <text x="480" y="500" text-anchor="middle" class="note">Red = negative weight, Blue = positive weight, Yellow/Orange = smoothing weights</text>
+</svg>
