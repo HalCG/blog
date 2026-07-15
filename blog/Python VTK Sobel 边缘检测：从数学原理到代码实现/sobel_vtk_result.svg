@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="560" viewBox="0 0 960 560">
+  <style>
+    .title { font: bold 18px sans-serif; fill: #222; }
+    .label { font: 13px sans-serif; fill: #333; text-anchor: middle; }
+    .note { font: 12px sans-serif; fill: #666; }
+  </style>
+  <rect width="960" height="560" fill="#fafafa"/>
+  <text x="480" y="28" text-anchor="middle" class="title">VTK Sobel Edge Detection Pipeline (Schematic)</text>
+
+  <!-- Original -->
+  <text x="160" y="52" class="label">Original</text>
+  <rect x="40" y="60" width="240" height="200" fill="#111" stroke="#444"/>
+  <rect x="90" y="90" width="50" height="120" fill="#fff"/>
+  <rect x="170" y="110" width="50" height="80" fill="#fff"/>
+  <circle cx="160" cy="160" r="28" fill="#bbb"/>
+
+  <!-- |Gx| -->
+  <text x="480" y="52" class="label">|Gx| (vertical edges)</text>
+  <rect x="360" y="60" width="240" height="200" fill="#222" stroke="#444"/>
+  <rect x="88" y="88" width="6" height="124" fill="#fff" transform="translate(360,60)"/>
+  <rect x="138" y="88" width="6" height="124" fill="#fff" transform="translate(360,60)"/>
+  <rect x="168" y="108" width="6" height="84" fill="#ccc" transform="translate(360,60)"/>
+  <rect x="218" y="108" width="6" height="84" fill="#ccc" transform="translate(360,60)"/>
+  <circle cx="160" cy="160" r="28" fill="none" stroke="#fff" stroke-width="4" transform="translate(360,60)"/>
+
+  <!-- |Gy| -->
+  <text x="800" y="52" class="label">|Gy| (horizontal edges)</text>
+  <rect x="680" y="60" width="240" height="200" fill="#222" stroke="#444"/>
+  <rect x="88" y="88" width="54" height="6" fill="#fff" transform="translate(680,60)"/>
+  <rect x="88" y="206" width="54" height="6" fill="#fff" transform="translate(680,60)"/>
+  <rect x="168" y="108" width="54" height="6" fill="#ccc" transform="translate(680,60)"/>
+  <rect x="168" y="186" width="54" height="6" fill="#ccc" transform="translate(680,60)"/>
+  <circle cx="160" cy="160" r="28" fill="none" stroke="#fff" stroke-width="4" transform="translate(680,60)"/>
+
+  <!-- |grad| -->
+  <text x="160" y="300" class="label">|grad f| = sqrt(Gx^2 + Gy^2)</text>
+  <rect x="40" y="308" width="240" height="200" fill="#222" stroke="#444"/>
+  <rect x="88" y="88" width="54" height="124" fill="none" stroke="#fff" stroke-width="3" transform="translate(40,308)"/>
+  <rect x="168" y="108" width="54" height="84" fill="none" stroke="#ddd" stroke-width="3" transform="translate(40,308)"/>
+  <circle cx="160" cy="160" r="30" fill="none" stroke="#fff" stroke-width="4" transform="translate(40,308)"/>
+
+  <!-- Manual convolve -->
+  <text x="480" y="300" class="label">Gx via vtkImageConvolve</text>
+  <rect x="360" y="308" width="240" height="200" fill="#222" stroke="#444"/>
+  <rect x="88" y="88" width="6" height="124" fill="#fff" transform="translate(360,308)"/>
+  <rect x="138" y="88" width="6" height="124" fill="#fff" transform="translate(360,308)"/>
+  <rect x="168" y="108" width="6" height="84" fill="#ccc" transform="translate(360,308)"/>
+  <rect x="218" y="108" width="6" height="84" fill="#ccc" transform="translate(360,308)"/>
+  <circle cx="160" cy="160" r="28" fill="none" stroke="#fff" stroke-width="4" transform="translate(360,308)"/>
+
+  <!-- Difference -->
+  <text x="800" y="300" class="label">|Gx_sobel - Gx_convolve| ~ 0</text>
+  <rect x="680" y="308" width="240" height="200" fill="#333" stroke="#444"/>
+  <text x="800" y="418" class="label" fill="#aaa">Nearly zero (kernels match)</text>
+
+  <text x="480" y="540" text-anchor="middle" class="note">Run sobel_vtk_demo.py locally to export high-resolution PNG results with real VTK output.</text>
+</svg>
