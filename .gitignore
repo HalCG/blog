@@ -1,11 +1,23 @@
-# Node.js dependencies
-node_modules/
+# 公司项目（坚果云同步，不纳入 Git）
+projects/
 
-# VitePress build outputs
-.vitepress/dist/
-.vitepress/cache/
+# Node.js 依赖
+site/node_modules/
 
-# Local env files
+# VitePress 构建产物与缓存
+site/.vitepress/dist/
+site/.vitepress/cache/
+
+# 坚果云 & Obsidian 配置
+.obsidian/
+
+# 杂项
+copilot/
+other/
+blog.7z
+blog/.gitignore.bak
+
+# 本地环境
 .env
 .env.local
 
