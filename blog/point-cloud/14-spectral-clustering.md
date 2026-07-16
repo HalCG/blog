@@ -46,9 +46,9 @@ $$D_{ii} = \sum_{j=1}^N W_{ij}$$
 
 在点云处理中，相似度通常由距离定义：
 
-$$w_{ij} = \begin{cases} \exp\left(-\frac{\|p_i - p_j\|^2}{2\sigma^2}\right) & \text{if } j \in \mathcal{N}_K(i) \text{ or } \|p_i - p_j\| < \epsilon \\ 0 & \text{otherwise} \end{cases}$$
+$$w_{ij} = \begin{cases} \exp\left(-\frac{\|p_i - p_j\|^2}{2\sigma^2}\right) & \text{if } j \in \mathcal{N}_K(i) \text{ or } \|p_i - p_j\| `< \epsilon \\ 0 & \text{otherwise} \end{cases}$$
 
-> 使用 KNN 图或 $\epsilon$-邻域图不仅减少了边的数量（稀疏矩阵），还避免了远距离点之间的虚假连接。
+>` 使用 KNN 图或 $\epsilon$-邻域图不仅减少了边的数量（稀疏矩阵），还避免了远距离点之间的虚假连接。
 
 ---
 

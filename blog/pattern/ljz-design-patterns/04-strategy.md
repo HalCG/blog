@@ -104,7 +104,7 @@ int main() {
 }
 ```
 
-现代 C++ 也可用 `std::function<void(double)>` 作轻量策略，无需继承。
+现代 C++ 也可用 `std::function`<void(double)>`` 作轻量策略，无需继承。
 
 ---
 

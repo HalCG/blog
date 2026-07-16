@@ -377,13 +377,13 @@ def sequential_ransac(pcd, n_planes=3, distance_threshold=0.03):
 | **退化配置** | 3 个采样点共线时无法定义平面 | 采样后检查退化并重采 |
 | **多模型** | 只能找一个模型 | 序贯 RANSAC（逐个移除） |
 | **伪影** | 可能在随机噪声中找到虚假结构 | 用统计检验验证最终模型 |
-| **内点率极低** | $p < 10\%$ 时几乎不可能采样到好集合 | PROSAC（渐进采样）或局部优化 |
+| **内点率极低** | $p `< 10\%$ 时几乎不可能采样到好集合 | PROSAC（渐进采样）或局部优化 |
 
 ### 6.1 MSAC（M-Estimator SAmple Consensus）
 
 MSAC 不设硬阈值，而是对残差进行平滑惩罚（如 Huber 损失），降低了阈值敏感度：
 
-$$L(r) = \begin{cases} r^2 & |r| \leq \tau \\ 2\tau|r| - \tau^2 & |r| > \tau \end{cases}$$
+$$L(r) = \begin{cases} r^2 & |r| \leq \tau \\ 2\tau|r| - \tau^2 & |r| >` \tau \end{cases}$$
 
 ### 6.2 退化检测
 

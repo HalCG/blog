@@ -158,14 +158,19 @@
   border-bottom-color: var(--vp-c-brand-1);
 }
 
-/* 优雅的渐变色横向分割线 (---)：加宽至 2.5px，调高不透明度，提升物理区域划分感 */
+/* 优雅的横向分割线 (---)：采用 2px 整像素实线，彻底消除亚像素渲染导致的模糊与对齐错位，在暗色下加亮显示 */
 .vp-doc hr {
   border: none !important;
-  height: 2.5px !important;
-  background: linear-gradient(to right, transparent, var(--vp-c-brand-1) 50%, transparent) !important;
+  height: 2px !important;
+  background-color: var(--vp-c-divider) !important;
   margin: 38px 0 !important;
-  opacity: 0.8 !important;
+  opacity: 1 !important;
 }
+
+.dark .vp-doc hr {
+  background-color: rgba(56, 189, 248, 0.45) !important; /* 暗色模式下更亮、更分明的极光蓝实线 */
+}
+
 
 /* 引用块 (Blockquote) 优雅重置 */
 .vp-doc blockquote {

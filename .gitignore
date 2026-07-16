@@ -17,6 +17,14 @@ other/
 blog.7z
 blog/.gitignore.bak
 
+# 坚果云其他文件夹
+workspace
+我的坚果云
+
+# 工作项目文件夹
+blog/JMColor_ProjectDetails
+blog/JMScan-face_ProjectDetails
+
 # 本地环境
 .env
 .env.local

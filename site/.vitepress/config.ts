@@ -120,6 +120,16 @@ export default defineConfig({
     sidebar: {
       '/': [
         {
+          text: 'C++ 核心与网络开发',
+          collapsed: true,
+          items: getArticlesInDir('cpp')
+        },
+        {
+          text: 'Qt 开发与工程实战',
+          collapsed: true,
+          items: getArticlesInDir('cpp/qt')
+        },
+        {
           text: 'OpenGL 应用与原理',
           collapsed: true,
           items: getArticlesInDir('OpenGL应用')
@@ -128,17 +138,25 @@ export default defineConfig({
           text: 'VTK 开发与图像处理',
           collapsed: true,
           items: [
-            ...getArticlesInDir('VTK 交互系统详解：vtkRenderWindowInteractor 内部流程'),
-            ...getArticlesInDir('Python VTK Canny 边缘检测：从数学原理到代码实现'),
-            ...getArticlesInDir('Python VTK Sobel 边缘检测：从数学原理到代码实现'),
+            ...getArticlesInDir('vtk'),
             { text: 'VTK 观察者与命令模式', link: '/pattern/vtk-observer-and-command-pattern' },
             ...getArticlesInDir('pattern/vtk')
           ]
         },
         {
-          text: '三维点云处理 (PCL/Open3D)',
+          text: 'VTK 源码剖析与机制',
+          collapsed: true,
+          items: getArticlesInDir('vtk-source')
+        },
+        {
+          text: '三维点云 (理论与算法)',
           collapsed: true,
           items: getArticlesInDir('point-cloud')
+        },
+        {
+          text: '三维点云 (应用与实战)',
+          collapsed: true,
+          items: getArticlesInDir('point-cloud-applied')
         },
         {
           text: 'Qt 与设计模式开发',
@@ -170,6 +188,13 @@ export default defineConfig({
               text: '软件设计哲学',
               items: getArticlesInDir('books/software-design-philosophy')
             }
+          ]
+        },
+        {
+          text: '网站发布与云端托管',
+          collapsed: true,
+          items: [
+            { text: 'Vercel 云端部署与本地运行', link: '/vercel-deployment' }
           ]
         }
       ]
