@@ -308,3 +308,131 @@
   border-color: var(--vp-c-brand-1) !important;
   box-shadow: 0 0 10px rgba(56, 189, 248, 0.2) !important;
 }
+
+/* ==========================================================================
+   10. 布局比例优化：按窗口比例分配三栏空间，消除固定尺寸带来的大量留白
+   ========================================================================== */
+
+/*
+ * 核心思路：
+ *   1. 目录宽度  = clamp(最小值, 比例值, 最大值)，默认 ~16vw，随窗口自适应
+ *   2. 文章区域  = flex-grow，填满剩余可用空间
+ *   3. 大纲宽度  = 保持右侧固定宽度（约 240px）
+ *   4. 去除 VitePress 在 ≥1440px 时对 sidebar/content 的复杂 calc() 公式，
+ *      让 --vp-sidebar-width 直接控制侧边栏宽度，拖拽逻辑不再跳变
+ */
+
+:root {
+  --vp-layout-max-width: 100%;                            /* 不再用固定 px 限制整体宽度 */
+  --vp-sidebar-width: clamp(230px, 16vw, 440px);          /* 目录宽度按比例，带上下限 */
+}
+
+/* ---------- 消除 VitePress ≥1440px 的复杂 calc，改为简洁直通 ---------- */
+:root {
+  --vp-outer-pad: clamp(16px, 2vw, 40px);  /* 左右两侧距屏幕边缘的留白 */
+}
+
+@media (min-width: 1440px) {
+  .VPSidebar {
+    width: var(--vp-sidebar-width) !important;
+    /* 左侧留白用比例值，不再依赖 calc(100vw - max-width) */
+    padding-left: max(var(--vp-outer-pad), calc((100vw - var(--vp-layout-max-width)) / 2)) !important;
+  }
+
+  .VPContent.has-sidebar {
+    padding-left: var(--vp-sidebar-width) !important;
+    padding-right: var(--vp-outer-pad) !important;  /* 右侧大纲与屏幕边缘的呼吸空间 */
+  }
+}
+
+/* ---------- 削减双层 padding，文章两侧按比例留一点呼吸空间 ---------- */
+/* VPDoc 自带 32px 左右 padding，.content 又各加 32px，共 64px 留白——按比例削减 */
+@media (min-width: 960px) {
+  .VPDoc {
+    padding-left: clamp(12px, 1.8vw, 28px) !important;
+    padding-right: clamp(12px, 1.8vw, 28px) !important;
+  }
+
+  .VPDoc .content {
+    padding-left: clamp(12px, 1.8vw, 28px) !important;
+    padding-right: clamp(12px, 1.8vw, 28px) !important;
+  }
+}
+
+/* ---------- 文章标题吸顶：标题始终可见，正文在其下方滚动 ---------- */
+.vp-doc h1 {
+  position: sticky;
+  top: var(--vp-nav-height);
+  z-index: 5;
+  padding-top: 0.4em;
+  padding-bottom: 0.3em;
+  margin-bottom: 0.5em;
+  background: linear-gradient(
+    to bottom,
+    var(--vp-c-bg) 60%,
+    transparent 100%
+  );
+}
+
+/* ---------- 文章内容区：flex 填满剩余空间 ---------- */
+@media (min-width: 1280px) {
+  .VPDoc .container {
+    justify-content: flex-start !important;   /* 左对齐，让 content 自由伸展 */
+  }
+
+  .VPDoc .content {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+  }
+
+  /* 移除固定 max-width，让文章使用全部可用宽度 */
+  .VPDoc.has-aside .content-container {
+    max-width: none !important;
+  }
+
+  /* 右侧大纲固定宽度，略微减少内边距 */
+  .VPDoc .aside {
+    flex: 0 0 auto !important;
+    padding-left: 20px !important;
+  }
+}
+
+/* ==========================================================================
+   11. 左侧目录侧边栏拖拽调整宽度 (Resizable Sidebar Handle)
+   ========================================================================== */
+
+.VPSidebar {
+  position: relative;
+}
+
+.sidebar-resize-handle {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 6px;
+  height: 100%;
+  cursor: col-resize;
+  z-index: 100;
+  background: transparent;
+  transition: background-color 0.2s ease;
+}
+
+.sidebar-resize-handle:hover,
+.sidebar-resize-handle.dragging {
+  background-color: var(--vp-c-brand-1);
+  opacity: 0.35;
+}
+
+/* 移动端隐藏拖拽手柄（侧边栏宽度由 VitePress 固定控制） */
+@media (max-width: 959px) {
+  .sidebar-resize-handle {
+    display: none !important;
+  }
+}
+
+/* 拖拽时禁止选中文字 */
+body.sidebar-resizing {
+  user-select: none !important;
+  -webkit-user-select: none !important;
+  cursor: col-resize !important;
+}
