@@ -53,19 +53,64 @@ description: 介绍三维点云特征点检测的基本概念（可重复性、�
 
 Harris 检测器通过分析图像局部窗口中梯度的分布来识别角点：
 
-```
-  不同区域的梯度分布
-
-  平坦区域                 边缘区域                  角点区域
-  ┌─────────┐            ┌─────────┐            ┌─────────┐
-  │ · · · · │            │ → → → → │            │ ↓ → ↓ → │
-  │ · · · · │            │ → → → → │            │ ↑ ← ↑ ← │
-  │ · · · · │            │ → → → → │            │ ↓ → ↓ → │
-  │ · · · · │            │ → → → → │            │ → ← → ← │
-  └─────────┘            └─────────┘            └─────────┘
-  梯度≈0 各方向           梯度方向单一              梯度方向多样
-  λ₁≈0, λ₂≈0              λ₁>>0, λ₂≈0             λ₁,λ₂ 都 >0
-```
+<svg viewBox="0 0 600 200" width="100%" style="background-color: transparent; font-family: sans-serif; margin: 20px 0; overflow: visible;">
+  <!-- Flat Region (Left) -->
+  <g transform="translate(40, 20)">
+  <text x="70" y="10" text-anchor="middle" font-size="13" fill="currentColor">1. 平坦区域 (Flat)</text>
+  <rect x="10" y="25" width="120" height="120" fill="none" stroke="currentColor" stroke-width="1.5" rx="6" />
+  <g stroke="var(--vp-c-text-3)" stroke-width="1.5" opacity="0.4" marker-end="url(#arrow-faded)">
+  <line x1="30" y1="50" x2="33" y2="53" />
+  <line x1="60" y1="45" x2="57" y2="42" />
+  <line x1="90" y1="55" x2="93" y2="52" />
+  <line x1="45" y1="85" x2="42" y2="88" />
+  <line x1="75" y1="80" x2="78" y2="77" />
+  <line x1="105" y1="95" x2="102" y2="98" />
+  <line x1="50" y1="120" x2="53" y2="123" />
+  <line x1="85" y1="125" x2="82" y2="122" />
+  </g>
+  <text x="70" y="165" text-anchor="middle" font-size="11" fill="var(--vp-c-text-2)">梯度微弱，方向随机<br/>λ₁ ≈ 0,  λ₂ ≈ 0</text>
+  </g>
+  <!-- Edge Region (Middle) -->
+  <g transform="translate(230, 20)">
+  <text x="70" y="10" text-anchor="middle" font-size="13" fill="currentColor">2. 边缘区域 (Edge)</text>
+  <rect x="10" y="25" width="120" height="120" fill="none" stroke="currentColor" stroke-width="1.5" rx="6" />
+  <g stroke="#1677ff" stroke-width="2" marker-end="url(#arrow-blue-harris)">
+  <line x1="30" y1="50" x2="55" y2="50" />
+  <line x1="30" y1="85" x2="55" y2="85" />
+  <line x1="30" y1="120" x2="55" y2="120" />
+  <line x1="75" y1="50" x2="100" y2="50" />
+  <line x1="75" y1="85" x2="100" y2="85" />
+  <line x1="75" y1="120" x2="100" y2="120" />
+  </g>
+  <text x="70" y="165" text-anchor="middle" font-size="11" fill="#1677ff">梯度方向单一且强烈<br/>λ₁ ≫ 0,  λ₂ ≈ 0</text>
+  </g>
+  <!-- Corner Region (Right) -->
+  <g transform="translate(420, 20)">
+  <text x="70" y="10" text-anchor="middle" font-size="13" fill="currentColor">3. 角点区域 (Corner)</text>
+  <rect x="10" y="25" width="120" height="120" fill="none" stroke="currentColor" stroke-width="1.5" rx="6" />
+  <g stroke="#52c41a" stroke-width="2" marker-end="url(#arrow-green-harris)">
+  <line x1="30" y1="50" x2="55" y2="50" />
+  <line x1="30" y1="110" x2="55" y2="110" />
+  <line x1="85" y1="45" x2="85" y2="20" />
+  <line x1="85" y1="105" x2="85" y2="80" />
+  <line x1="50" y1="80" x2="68" y2="62" />
+  <line x1="100" y1="125" x2="118" y2="107" />
+  </g>
+  <text x="70" y="165" text-anchor="middle" font-size="11" fill="#52c41a">梯度方向丰富且显著<br/>λ₁ ≫ 0,  λ₂ ≫ 0</text>
+  </g>
+  <!-- Markers -->
+  <defs>
+  <marker id="arrow-faded" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="4" markerHeight="4" orient="auto">
+  <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="var(--vp-c-text-3)" />
+  </marker>
+  <marker id="arrow-blue-harris" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="4" markerHeight="4" orient="auto">
+  <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#1677ff" />
+  </marker>
+  <marker id="arrow-green-harris" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="4" markerHeight="4" orient="auto">
+  <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#52c41a" />
+  </marker>
+  </defs>
+</svg>
 
 ### 2.2 结构张量与角点响应
 

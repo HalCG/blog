@@ -63,19 +63,19 @@ protected:
 
 模板方法 = **好莱坞原则**：「Don't call us, we'll call you.」
 
-```
-start()
-  → 平台线程创建
-  → run()  [子类实现]
-  → 线程结束清理
+```mermaid
+flowchart TD
+    A["start()"] --> B["平台线程创建"]
+    B --> C["run()<br/>（子类实现）"]
+    C --> D["线程结束清理"]
 ```
 
 `paintEvent` 链：
 
-```
-QApplication::notify
-  → QWidget::event
-  → case QEvent::Paint: paintEvent(e);  // 子类可 override
+```mermaid
+flowchart TD
+    A["QApplication::notify"] --> B["QWidget::event"]
+    B --> C["case QEvent::Paint:<br/>paintEvent(e)（子类可 override）"]
 ```
 
 ---

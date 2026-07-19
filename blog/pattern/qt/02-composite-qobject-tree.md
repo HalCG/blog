@@ -29,10 +29,11 @@
 
 ## GoF 组合结构
 
-```
-Component
- ├── Leaf
- └── Composite ── contains ──▶ Component*
+```mermaid
+classDiagram
+    Component <|-- Leaf
+    Component <|-- Composite
+    Composite o-- Component : contains
 ```
 
 | 角色 | Qt 对应 |

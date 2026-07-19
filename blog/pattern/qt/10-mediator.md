@@ -39,11 +39,11 @@ connect(spinBox, QOverload<int>::of(&QSpinBox::valueChanged), slider, &QSlider::
 
 ### 1. 事件循环
 
-```
-QCoreApplication::exec()
-  → 取事件队列
-  → notify(receiver, event)
-  → receiver->event(event)
+```mermaid
+flowchart TD
+    A["QCoreApplication::exec()"] --> B["取事件队列"]
+    B --> C["notify(receiver, event)"]
+    C --> D["receiver->event(event)"]
 ```
 
 ### 2. event() 与具体处理函数

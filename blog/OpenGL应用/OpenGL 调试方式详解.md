@@ -154,7 +154,7 @@ void initDebugOutput()
 #endif
 ```
 
-### 2. Qt 框架下的配置（⚠️ 核心知识补齐）
+### 2. Qt 框架下的配置（️ 核心知识补齐）
 在 Qt 开发中，很多开发者直接实例化了 `QOpenGLDebugLogger` 却收不到任何日志，正是因为没有预先配置好上下文。正确的做法是在应用程序的主入口（或重写 `initializeGL()` 之前）进行如下配置：
 
 ```cpp
@@ -247,7 +247,7 @@ void checkFramebuffer()
 }
 ```
 
-### 2. `glReadPixels` 的内存对齐限制（⚠️ 核心知识补齐）
+### 2. `glReadPixels` 的内存对齐限制（️ 核心知识补齐）
 当我们需要截屏、或者将 FBO 内容下载到 CPU 内存进行比对时，会调用 `glReadPixels`。
 这里存在一个经常导致程序莫名崩溃或读取图片发生倾斜错位的隐藏陷阱：**默认的像素存储对齐策略**。
 - **原因**：OpenGL 默认的 `GL_PACK_ALIGNMENT` 为 4 字节。也就是说，OpenGL 假定图像的每一行字节数都是 4 的倍数。

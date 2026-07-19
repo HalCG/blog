@@ -60,18 +60,31 @@ $$p(x \mid \Theta) = \sum_{k=1}^K \pi_k \cdot \mathcal{N}(x \mid \mu_k, \Sigma_k
 | **Tied** | $\Sigma$（全簇共享） | $d(d+1)/2$ | 相同椭球形 | `⬭ ⬭ ⬭` |
 | **Full** | $\Sigma_k$（各自独立） | $3 \times d(d+1)/2$ | 任意椭球形 | `⬭ ⬮ ⬯` |
 
-```
-  不同协方差类型对聚类结果的影响
-
-  Spherical             Diagonal              Full
-  (各向同性球)          (轴对齐椭圆)          (任意方向椭圆)
-
-     ○                     ⬭                     ⬮
-    ○ ○                   ⬭ ⬭                  ⬮ ⬮
-   ○   ○                ⬭     ⬭              ⬮     ⬮
-    ○ ○                   ⬭ ⬭                  ⬮ ⬮
-     ○                     ⬭                     ⬮
-```
+<svg viewBox="0 0 600 160" width="100%" style="background-color: transparent; font-family: sans-serif; margin: 20px 0; overflow: visible;">
+  <!-- Spherical -->
+  <g transform="translate(100, 70)">
+  <circle cx="0" cy="0" r="45" fill="rgba(22, 119, 255, 0.15)" stroke="#1677ff" stroke-width="2.5" />
+  <circle cx="0" cy="0" r="3" fill="#1677ff" />
+  <text x="0" y="65" text-anchor="middle" font-size="14" fill="currentColor">Spherical</text>
+  <text x="0" y="85" text-anchor="middle" font-size="12" fill="var(--vp-c-text-2)">(各向同性圆/球)</text>
+  </g>
+  <!-- Diagonal -->
+  <g transform="translate(300, 70)">
+  <ellipse cx="0" cy="0" rx="60" ry="30" fill="rgba(82, 196, 26, 0.15)" stroke="#52c41a" stroke-width="2.5" />
+  <circle cx="0" cy="0" r="3" fill="#52c41a" />
+  <text x="0" y="65" text-anchor="middle" font-size="14" fill="currentColor">Diagonal</text>
+  <text x="0" y="85" text-anchor="middle" font-size="12" fill="var(--vp-c-text-2)">(轴对齐椭圆/椭球)</text>
+  </g>
+  <!-- Full -->
+  <g transform="translate(500, 70)">
+  <g transform="rotate(-25)">
+  <ellipse cx="0" cy="0" rx="65" ry="25" fill="rgba(245, 34, 45, 0.15)" stroke="#f5222d" stroke-width="2.5" />
+  <circle cx="0" cy="0" r="3" fill="#f5222d" />
+  </g>
+  <text x="0" y="65" text-anchor="middle" font-size="14" fill="currentColor">Full</text>
+  <text x="0" y="85" text-anchor="middle" font-size="12" fill="var(--vp-c-text-2)">(任意方向椭圆/椭球)</text>
+  </g>
+</svg>
 
 > 对于三维点云，Full 协方差意味着每个簇有 6 个独立参数（$\Sigma_{xx}, \Sigma_{yy}, \Sigma_{zz}, \Sigma_{xy}, \Sigma_{xz}, \Sigma_{yz}$），能捕捉任意朝向的椭球体。
 
@@ -87,7 +100,7 @@ $$p(x \mid \Theta) = \sum_{k=1}^K \pi_k \cdot \mathcal{N}(x \mid \mu_k, \Sigma_k
 
 ### 3.2 E 步（Expectation）：计算后验概率
 
-给定当前参数 $\Theta^{(t)}$，计算每个点属于每个分量的后验概率（责任度）：
+给定当前参数 $\Theta^{(t)}$, 计算每个点属于每个分量的后验概率（责任度）：
 
 $$\gamma_{ik} = P(z_i = k \mid x_i, \Theta^{(t)}) = \frac{\pi_k \cdot \mathcal{N}(x_i \mid \mu_k, \Sigma_k)}{\sum_{j=1}^K \pi_j \cdot \mathcal{N}(x_i \mid \mu_j, \Sigma_j)}$$
 
@@ -105,27 +118,14 @@ $$\pi_k^{(t+1)} = \frac{1}{N} \sum_{i=1}^N \gamma_{ik}$$
 
 ### 3.4 算法流程
 
-```
-  ┌──────────────────────────────────────────────────────┐
-  │              EM 算法求解 GMM                           │
-  ├──────────────────────────────────────────────────────┤
-  │                                                       │
-  │  初始化: {π_k, μ_k, Σ_k} (通常用 K-Means 结果)        │
-  │                                                       │
-  │  ┌───────────────────────────────────────────┐        │
-  │  │  while 对数似然变化 > ε:                    │        │
-  │  │                                            │        │
-  │  │    E 步: 计算责任度 γ_{ik}                  │        │
-  │  │           (每个点→每个分量的归属概率)         │        │
-  │  │                                            │        │
-  │  │    M 步: 用责任度加权更新 π_k, μ_k, Σ_k     │        │
-  │  │                                            │        │
-  │  │    计算对数似然:                             │        │
-  │  │    log L = Σ_i log( Σ_k π_k N(x_i|μ_k,Σ_k) )│       │
-  │  │                                            │        │
-  │  └───────────────────────────────────────────┘        │
-  │                                                       │
-  └──────────────────────────────────────────────────────┘
+```mermaid
+flowchart TD
+    A["初始化: {π_k, μ_k, Σ_k}<br/>(通常用 K-Means 结果)"] --> B["E 步: 计算责任度 γ_{ik}<br/>(每个点到每个分量的归属概率)"]
+    B --> C["M 步: 用责任度加权更新 π_k, μ_k, Σ_k"]
+    C --> D["计算对数似然 log L"]
+    D --> E{"对数似然变化 > ε ?"}
+    E -->|是| B
+    E -->|否| F["收敛结束"]
 ```
 
 ---
@@ -261,20 +261,30 @@ $$BIC = k \cdot \ln(N) - 2 \ln(\hat{L})$$
 
 ### 6.1 各向异性物体分割
 
-```
-  汽车点云: K-Means vs GMM
-
-  原始点云 (俯视图)      K-Means (球形假设)         GMM (Full 协方差)
-
-    ██████████████          ●₁ ████████ ●₂            ┌──────────────────┐
-    ██          ██         ●₁ ██      ██ ●₂          │  ██████████████  │
-    ██   🚗    ██         ●₁ ██ 🚗  ██ ●₂          │  ██          ██  │ 单簇
-    ██          ██         ●₁ ██      ██ ●₂          │  ██   🚗    ██  │
-    ██████████████          ●₁ ████████ ●₂           │  ██          ██  │
-                                                      │  ██████████████  │
-  K-Means 错误地切分了车身  (被 Voronoi 边界切开)    └──────────────────┘
-                                                      GMM 用椭圆正确包裹整车
-```
+<svg viewBox="0 0 600 240" width="100%" style="background-color: transparent; font-family: sans-serif; margin: 20px 0; overflow: visible;">
+  <!-- Original Car Point Cloud (Left) -->
+  <g transform="translate(100, 50)">
+  <rect x="-65" y="-20" width="130" height="40" rx="6" fill="rgba(100, 100, 100, 0.08)" stroke="currentColor" stroke-dasharray="4 4" stroke-width="1.5" />
+  <text x="0" y="5" text-anchor="middle" font-size="13" fill="currentColor">🚗 车身散点</text>
+  <text x="0" y="140" text-anchor="middle" font-size="14" fill="currentColor">原始点云 (俯视图)</text>
+  </g>
+  <!-- K-Means split (Middle) -->
+  <g transform="translate(300, 50)">
+  <circle cx="-30" cy="0" r="42" fill="rgba(22, 119, 255, 0.12)" stroke="#1677ff" stroke-width="2" stroke-dasharray="3 3" />
+  <circle cx="30" cy="0" r="42" fill="rgba(250, 173, 20, 0.12)" stroke="#faad14" stroke-width="2" stroke-dasharray="3 3" />
+  <line x1="0" y1="-55" x2="0" y2="55" stroke="#f5222d" stroke-width="2" stroke-dasharray="5 5" />
+  <text x="0" y="70" text-anchor="middle" font-size="12" fill="#f5222d">Voronoi 割裂线</text>
+  <text x="0" y="140" text-anchor="middle" font-size="14" fill="currentColor">K-Means (球形假设)</text>
+  <text x="0" y="165" text-anchor="middle" font-size="12" fill="#f5222d">错误地切分了长条形车身</text>
+  </g>
+  <!-- GMM ellipse (Right) -->
+  <g transform="translate(500, 50)">
+  <ellipse cx="0" cy="0" rx="72" ry="28" fill="rgba(82, 196, 26, 0.15)" stroke="#52c41a" stroke-width="3" />
+  <text x="0" y="5" text-anchor="middle" font-size="13" fill="#52c41a">🚗 车身单簇</text>
+  <text x="0" y="140" text-anchor="middle" font-size="14" fill="currentColor">GMM (Full 协方差)</text>
+  <text x="0" y="165" text-anchor="middle" font-size="12" fill="#52c41a">用各向异性椭圆正确包裹</text>
+  </g>
+</svg>
 
 ### 6.2 点云超体素生成
 

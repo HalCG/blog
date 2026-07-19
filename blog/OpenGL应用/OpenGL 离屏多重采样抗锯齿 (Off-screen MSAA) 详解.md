@@ -23,13 +23,18 @@
 
 离屏 MSAA 的处理流程通常如下：
 
-```
-                    【渲染阶段】                                          【解析阶段】                       【后处理/显示】
-┌───────────────────────────────────────────────────┐               ┌───────────────────┐               ┌─────────────┐
-│                     MSAA FBO                      │               │  Intermediate FBO │               │   Screen    │
-│  - 颜色附件：GL_TEXTURE_2D_MULTISAMPLE (多采样纹理)│ ─(Resolve)─>  │  - 颜色附件：      │ ─(Shader)──>  │ (Window FBO)│
-│  - 深度/模板附件：GL_RENDERBUFFER (多采样 RBO)       │  glBlitFBO    │    普通 2D 纹理   │  后处理着色器   │             │
-└───────────────────────────────────────────────────┘               └───────────────────┘               └─────────────┘
+```mermaid
+flowchart LR
+    subgraph A["渲染阶段：MSAA FBO"]
+        A1["颜色附件<br/>GL_TEXTURE_2D_MULTISAMPLE<br/>（多采样纹理）"]
+        A2["深度/模板附件<br/>GL_RENDERBUFFER<br/>（多采样 RBO）"]
+    end
+    subgraph B["解析阶段：Intermediate FBO"]
+        B1["颜色附件<br/>普通 2D 纹理"]
+    end
+    C["后处理/显示<br/>Screen (Window FBO)"]
+    A -- "Resolve<br/>glBlitFramebuffer()" --> B
+    B -- "后处理着色器<br/>(Shader)" --> C
 ```
 
 ### 1. 第一级：创建多重采样帧缓冲（MSAA FBO）
@@ -120,7 +125,7 @@ glBlitFramebuffer(
 );
 ```
 
-#### ⚠️ 避坑指南：为什么多采样 Resolve 时必须使用 `GL_NEAREST`？
+#### ️ 避坑指南：为什么多采样 Resolve 时必须使用 `GL_NEAREST`？
 在调用 `glBlitFramebuffer` 进行多采样解析时，OpenGL 规范有着严格的硬件限制：如果读取的缓冲区是多采样（Multisampled）的，过滤方式参数**必须**为 `GL_NEAREST`，否则会引发 `GL_INVALID_OPERATION` 错误。
 这是因为多采样解析算法是由 GPU 硬件中的混合单元专门执行的，它负责对多样本做数学求均值，普通的双线性过滤（`GL_LINEAR`）在多采样上下文中无法直接应用于样本选择，故驱动只允许设置 `GL_NEAREST`，实际的“平滑”效果是由多样本平均算法本身达成的。
 

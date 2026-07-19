@@ -1,4 +1,5 @@
 import { defineConfig } from 'vitepress'
+import { withMermaid } from 'vitepress-plugin-mermaid'
 import fs from 'fs'
 import path from 'path'
 import mathjax3 from 'markdown-it-mathjax3'
@@ -20,7 +21,10 @@ function getArticlesInDir(dirRelativePath: string) {
   
   const items = mdFiles.map(file => {
     const filePath = path.join(dirPath, file)
-    const content = fs.readFileSync(filePath, 'utf-8')
+    let content = fs.readFileSync(filePath, 'utf-8')
+    if (content.startsWith('\uFEFF')) {
+      content = content.slice(1)
+    }
     
     // 尝试从 frontmatter 解析标题
     let title = ''
@@ -71,7 +75,32 @@ function getArticlesInDir(dirRelativePath: string) {
   return items
 }
 
-export default defineConfig({
+// 扫描“每篇文章一个子目录”结构（如 vtk-python），子目录名即文章标题，
+// 目录内优先取 *_blog.md 作为正文（忽略草稿等其他 md 文件）
+function getArticlesInSubdirs(dirRelativePath: string) {
+  const dirPath = path.resolve(BLOG_DIR, dirRelativePath)
+  if (!fs.existsSync(dirPath)) {
+    return []
+  }
+  const subdirs = fs.readdirSync(dirPath).filter(name =>
+    fs.statSync(path.join(dirPath, name)).isDirectory()
+  )
+
+  const items = subdirs.flatMap(sub => {
+    const files = fs.readdirSync(path.join(dirPath, sub))
+    const mdFiles = files.filter(f => f.endsWith('.md') && f.toLowerCase() !== 'readme.md')
+    // 优先取 *_blog.md，否则取第一个 md 文件
+    const main = mdFiles.find(f => /_blog\.md$/i.test(f)) || mdFiles[0]
+    if (!main) return []
+    const webLink = ('/' + path.join(dirRelativePath, sub, main.replace('.md', '')).replace(/\\/g, '/')).replace(/ /g, '%20')
+    return [{ text: sub, link: webLink }]
+  })
+
+  items.sort((a, b) => a.text.localeCompare(b.text, undefined, { numeric: true, sensitivity: 'base' }))
+  return items
+}
+
+export default withMermaid(defineConfig({
   title: 'Leo的个人空间',
   description: 'C++ / OpenGL / VTK / 设计模式 / 读书笔记 / 生活与健康',
   
@@ -80,9 +109,14 @@ export default defineConfig({
   
   // 解决 markdown 文件编译为 vue 组件时无法解析 vue 依赖的问题
   vite: {
+    cacheDir: path.resolve(__dirname, '../node_modules/.vite'),
     resolve: {
       alias: {
-        'vue': path.resolve(__dirname, '../node_modules/vue')
+        'vue': path.resolve(__dirname, '../node_modules/vue'),
+        // 本项目 srcDir 指向 ../blog（无 node_modules），vite 依赖预构建失效，
+        // mermaid 默认入口（core）引用的 CJS 子依赖无法在浏览器直接加载，
+        // 因此指向自包含的浏览器 ESM 版本
+        'mermaid': path.resolve(__dirname, '../node_modules/mermaid/dist/mermaid.esm.min.mjs')
       }
     }
   },
@@ -95,7 +129,16 @@ export default defineConfig({
     '需求.md',
     'implementation_plan.md',
     'task.md',
-    'walkthrough.md'
+    'walkthrough.md',
+    // 公司项目细节与面试准备，不公开发布
+    'JMColor_ProjectDetails/**',
+    'JMScan-face_ProjectDetails/**',
+    // 三维点云理论原文件，暂时不发布
+    'point-cloud/**',
+    // 李建忠设计模式课程笔记，不公开发布
+    'pattern/ljz-design-patterns/**',
+    // vtk-python 目录下的草稿文件
+    'vtk-python/**/新建*.md'
   ],
 
   // 忽略死链接检查（由于本地 Markdown 中包含大量跳转至 C++ 源码、Obsidian 本地配置或外部非 markdown 页面的链接，开启此项防止编译中断）
@@ -127,7 +170,7 @@ export default defineConfig({
         {
           text: 'Qt 开发与工程实战',
           collapsed: true,
-          items: getArticlesInDir('cpp/qt')
+          items: getArticlesInDir('qt')
         },
         {
           text: 'OpenGL 应用与原理',
@@ -135,13 +178,14 @@ export default defineConfig({
           items: getArticlesInDir('OpenGL应用')
         },
         {
+          text: 'OpenGL 渲染实例',
+          collapsed: true,
+          items: getArticlesInDir('OpenGlInstance')
+        },
+        {
           text: 'VTK 开发与图像处理',
           collapsed: true,
-          items: [
-            ...getArticlesInDir('vtk'),
-            { text: 'VTK 观察者与命令模式', link: '/pattern/vtk-observer-and-command-pattern' },
-            ...getArticlesInDir('pattern/vtk')
-          ]
+          items: getArticlesInDir('vtk-examples')
         },
         {
           text: 'VTK 源码剖析与机制',
@@ -149,10 +193,17 @@ export default defineConfig({
           items: getArticlesInDir('vtk-source')
         },
         {
+          text: 'VTK Python 图像处理专题',
+          collapsed: true,
+          items: getArticlesInSubdirs('vtk-python')
+        },
+        /*
+        {
           text: '三维点云 (理论与算法)',
           collapsed: true,
           items: getArticlesInDir('point-cloud')
         },
+        */
         {
           text: '三维点云 (应用与实战)',
           collapsed: true,
@@ -164,10 +215,17 @@ export default defineConfig({
           items: getArticlesInDir('pattern/qt')
         },
         {
+          text: 'VTK 设计模式',
+          collapsed: true,
+          items: getArticlesInDir('pattern/vtk')
+        },
+        /*
+        {
           text: 'GoF 23种设计模式 (李建忠)',
           collapsed: true,
-          items: getArticlesInDir('ljz-design-patterns')
+          items: getArticlesInDir('pattern/ljz-design-patterns')
         },
+        */
         {
           text: '软件设计原则与综合模式',
           collapsed: true,
@@ -250,4 +308,4 @@ export default defineConfig({
     darkModeSwitchTitle: '切换至深色模式',
     sidebarMenuLabel: '文章列表'
   }
-})
+}))

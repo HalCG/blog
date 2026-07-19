@@ -1,7 +1,7 @@
 # Qt / VTK 设计模式博文系列
 
 > 基于 Qt 6 与 VTK 官方 API / Kitware 源码撰写，每篇独立讲解一种设计模式。  
-> 更新日期：2026-07-07 · 共 **21 篇**（Qt 11 + VTK 10）
+> 更新日期：2026-07-19 · 共 **23 篇**（Qt 12 + VTK 11）
 
 ---
 
@@ -38,7 +38,7 @@ Qt 与 VTK 都是「框架内置设计模式」的典型代表。本系列将 Go
 
 Observer 与 Command 在 VTK 中高度融合，深度剖析见：
 
-**[vtk-observer-and-command-pattern.md](vtk-observer-and-command-pattern.md)**
+**[vtk/01-observer-command-detail.md](vtk/01-observer-command-detail.md)**
 
 入门可先读 [vtk/01-observer.md](vtk/01-observer.md) 与 [vtk/02-command.md](vtk/02-command.md)，再读进阶专题。
 
@@ -64,12 +64,14 @@ Observer 与 Command 在 VTK 中高度融合，深度剖析见：
 | 结构组织 | [02 组合](qt/02-composite-qobject-tree.md) | [09 组合](vtk/09-composite.md) |
 | 可替换算法 | [04 策略](qt/04-strategy.md) | [05 策略](vtk/05-strategy.md) |
 | 对象创建 | [06 工厂](qt/06-factory.md) | [07 工厂](vtk/07-factory.md) |
+| 内存与垃圾回收 | [09 享元](qt/09-flyweight.md)(COW) | [11 引用计数与 RAII](vtk/11-reference-counting-raii.md) |
+| 接口隔离与二进制兼容 | [12 Pimpl/d-指针](qt/12-d-pointer-pimpl.md) | — |
 | 数据流 | — | [03 管道](vtk/03-pipeline-filter.md) |
 | UI 架构 | [11 MVC](qt/11-mvc-model-view.md) | ParaView 自建层 |
 
 ---
 
-## Qt 完整目录（11 篇）
+## Qt 完整目录（12 篇）
 
 | # | 模式 | 文章 |
 |---|------|------|
@@ -84,8 +86,9 @@ Observer 与 Command 在 VTK 中高度融合，深度剖析见：
 | 09 | 享元 | [qt/09-flyweight.md](qt/09-flyweight.md) |
 | 10 | 中介者 | [qt/10-mediator.md](qt/10-mediator.md) |
 | 11 | MVC/MV | [qt/11-mvc-model-view.md](qt/11-mvc-model-view.md) |
+| 12 | Pimpl/d-指针 | [qt/12-d-pointer-pimpl.md](qt/12-d-pointer-pimpl.md) |
 
-## VTK 完整目录（10 篇）
+## VTK 完整目录（11 篇）
 
 | # | 模式 | 文章 |
 |---|------|------|
@@ -99,6 +102,7 @@ Observer 与 Command 在 VTK 中高度融合，深度剖析见：
 | 08 | 原型 | [vtk/08-prototype.md](vtk/08-prototype.md) |
 | 09 | 组合 | [vtk/09-composite.md](vtk/09-composite.md) |
 | 10 | 责任链 | [vtk/10-chain-of-responsibility.md](vtk/10-chain-of-responsibility.md) |
+| 11 | 引用计数与 RAII | [vtk/11-reference-counting-raii.md](vtk/11-reference-counting-raii.md) |
 
 ---
 
@@ -140,7 +144,7 @@ Observer 与 Command 在 VTK 中高度融合，深度剖析见：
 - [**软件设计原则与模式本质总览**](software-design-principles-and-patterns.md)
 - [书籍笔记：程序员修炼之道 & 软件设计的哲学](books/README.md)
 - [设计模式的思考：学习、误用与工程实践](design-patterns-reflections.md)
-- [VTK 观察者+命令深度专题](vtk-observer-and-command-pattern.md)
+- [VTK 观察者+命令深度专题](vtk/01-observer-command-detail.md)
 - [VTK 策略模式详解](vtk/05-strategy-detail.md)（InteractorStyle / Mapper / Picker）
 - [VTK 交互系统：vtkRenderWindowInteractor](../VTK%20交互系统详解：vtkRenderWindowInteractor%20内部流程/vtk_interactor_blog.md)
 - [Python VTK Sobel 边缘检测](../Python%20VTK%20Sobel%20边缘检测：从数学原理到代码实现/sobel_vtk_blog.md)

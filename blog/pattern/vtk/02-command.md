@@ -29,13 +29,13 @@ VTK 没有让你传裸函数指针给 `AddObserver`，而是要求传入 **`vtkC
 
 更准确的三层理解：
 
-```text
-vtkObject::InvokeEvent          ← Observer（一对多广播）
-        ↓
-vtkCommand::Execute             ← 回调对象（VTK 文档里叫 command）
-        ↓
-priority / AbortFlag / GrabFocus ← 责任链式分发（见 [10 责任链](10-chain-of-responsibility.md)）
+```mermaid
+flowchart TD
+    A["vtkObject::InvokeEvent<br/>Observer（一对多广播）"] --> B["vtkCommand::Execute<br/>回调对象（VTK 文档里叫 command）"]
+    B --> C["priority / AbortFlag / GrabFocus<br/>责任链式分发"]
 ```
+
+> 责任链式分发详见 [10 责任链](10-chain-of-responsibility.md)。
 
 **结论**：学 VTK 时把 `vtkCommand` 当成 **Observer 的 listener 对象** 最不容易混；叫它「命令模式」只能算**借用了 Command 的外形**（`Execute` 接口），别和 `QUndoCommand`、应用层撤销栈画等号。
 
@@ -160,12 +160,15 @@ renderer->AddObserver(vtkCommand::ResetCameraClippingRangeEvent,
 
 ### 触发方式对比（帮助记忆）
 
-```text
-GoF Command（QUndoCommand）:
-  用户点「移动」→ MoveCommand 入栈 → redo() / undo()
-
-vtkCommand:
-  renderer 发 StartEvent → 已登记的 vtkCommand::Execute() 被调用
+```mermaid
+flowchart LR
+    subgraph G1["GoF Command（QUndoCommand）"]
+        A1["用户点「移动」"] --> A2["MoveCommand 入栈"]
+        A2 --> A3["redo() / undo()"]
+    end
+    subgraph G2["vtkCommand"]
+        B1["renderer 发 StartEvent"] --> B2["已登记的<br/>vtkCommand::Execute() 被调用"]
+    end
 ```
 
 ---

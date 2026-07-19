@@ -29,7 +29,7 @@ target_include_directories(utils PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 # 创建主程序并链接工具库
 add_executable(app main.cpp)
 target_link_libraries(app PRIVATE utils) 
-# 💡 app 链接 utils 时，会自动继承 utils 导出的 PUBLIC 头文件目录，无需手动重复包含！
+# app 链接 utils 时，会自动继承 utils 导出的 PUBLIC 头文件目录，无需手动重复包含！
 ```
 
 ---
@@ -51,17 +51,12 @@ VSCode 的 CMake Tools 插件会自动读取此文件，提供一键切换平台
 
 VSCode 是一个文本编辑器，要让它具备编译和调试的能力，必须依靠 `.vscode` 目录下的三个核心 JSON 配置文件：
 
-```
-                       ┌────────────────────────┐
-                       │     CMakePresets.json  │ <-- 提供平台预设配置
-                       └───────────┬────────────┘
-                                   │
-         ┌─────────────────────────┼─────────────────────────┐
-         ▼                         ▼                         ▼
- ┌───────────────┐         ┌───────────────┐         ┌───────────────┐
- │  tasks.json   │         │  launch.json  │         │ settings.json │
- └───────────────┘         └───────────────┘         └───────────────┘
-  (执行编译任务)            (调用调试器)              (编辑器环境设置)
+```mermaid
+flowchart TD
+    P["CMakePresets.json<br/>提供平台预设配置"]
+    P --> T["tasks.json<br/>执行编译任务"]
+    P --> L["launch.json<br/>调用调试器"]
+    P --> S["settings.json<br/>编辑器环境设置"]
 ```
 
 ### 3.1 tasks.json（任务管理器）

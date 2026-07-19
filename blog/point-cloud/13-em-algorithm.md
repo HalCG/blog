@@ -48,26 +48,47 @@ $$\ell(\theta) \ge \int_Z q(Z) \log \frac{p(X, Z \mid \theta)}{q(Z)} \, dZ \tria
 
 $\mathcal{L}(q, \theta)$ 称为**证据下界（Evidence Lower BOund, ELBO）**。
 
-```
-  EM 的几何直觉
+<svg viewBox="0 0 500 240" width="100%" style="background-color: transparent; font-family: sans-serif; margin: 20px 0; overflow: visible;">
+  <!-- Axis -->
+  <line x1="40" y1="200" x2="460" y2="200" stroke="currentColor" stroke-width="1.5" marker-end="url(#em-axis-arrow)" />
+  <text x="470" y="204" font-size="12" fill="currentColor">θ</text>
+  <line x1="40" y1="200" x2="40" y2="30" stroke="currentColor" stroke-width="1.5" marker-end="url(#em-axis-arrow)" />
+  <text x="35" y="20" font-size="12" fill="currentColor" text-anchor="middle">ℓ(θ)</text>
+  <!-- Log-Likelihood curve (Main outer curve - high/smooth) -->
+  <path d="M 60,180 C 140,50 260,20 440,120" fill="none" stroke="currentColor" stroke-width="2.5" />
+  <text x="360" y="55" font-size="12" fill="currentColor">对数似然 ℓ(θ)</text>
+  <!-- ELBO old curve (Tangent to ℓ(θ) at θ_old) -->
+  <path d="M 90,195 C 120,130 160,110 230,170" fill="none" stroke="#f5222d" stroke-width="1.5" stroke-dasharray="3 2" />
+  <text x="95" y="150" font-size="11" fill="#f5222d">ELBO(θ; q_old)</text>
+  <!-- ELBO new curve (Tangent to ℓ(θ) at θ_new) -->
+  <path d="M 150,180 C 180,95 240,75 320,140" fill="none" stroke="#52c41a" stroke-width="1.5" />
+  <text x="220" y="85" font-size="11" fill="#52c41a">ELBO(θ; q_new)</text>
+  <!-- θ_old coordinate line and dot -->
+  <circle cx="160" cy="110" r="3.5" fill="#f5222d" />
+  <line x1="160" y1="110" x2="160" y2="200" stroke="#f5222d" stroke-width="1" stroke-dasharray="2 2" />
+  <text x="160" y="215" text-anchor="middle" font-size="11" fill="#f5222d">θ_old</text>
+  <!-- θ_new coordinate line and dot (maximum of ELBO_old) -->
+  <circle cx="180" cy="95" r="3.5" fill="#52c41a" />
+  <line x1="180" y1="95" x2="180" y2="200" stroke="#52c41a" stroke-width="1" stroke-dasharray="2 2" />
+  <text x="180" y="215" text-anchor="middle" font-size="11" fill="#52c41a">θ_new</text>
+  <!-- Annotations of EM steps -->
+  <path d="M 160,140 Q 170,135 180,140" fill="none" stroke="currentColor" stroke-width="1" marker-end="url(#em-step-arrow)" />
+  <text x="170" y="152" font-size="9" fill="currentColor" text-anchor="middle">M 步</text>
+  <path d="M 180,200 L 180,95" fill="none" stroke="currentColor" stroke-width="0.5" />
+  <!-- Markers -->
+  <defs>
+  <marker id="em-axis-arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+  <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="currentColor" />
+  </marker>
+  <marker id="em-step-arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="4" markerHeight="4" orient="auto">
+  <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="currentColor" />
+  </marker>
+  </defs>
+</svg>
 
-  对数似然 ℓ(θ)
-      ▲
-      │     ┌────────── ℓ(θ) ──────────┐
-      │    ╱                              ╲
-      │   ╱    ┌── ELBO(θ; q_new) ──┐      ╲
-      │  ╱    ╱                      ╲      ╲
-      │ ╱    ╱  ┌─ ELBO(θ; q_old) ─┐  ╲      ╲
-      │╱    ╱  ╱                    ╲  ╲      ╲
-      │    ╱  ╱                      ╲  ╲
-      │   ╱  ╱                        ╲  ╲
-      │  θ_old                       θ_new
-      └──────────────────────────────────────────► θ
-
-  EM 交替执行:
-  E 步: 更新 q → 使 ELBO 在 θ_old 处紧贴 ℓ(θ_old)
-  M 步: 更新 θ → 最大化 ELBO，将 ℓ(θ) 推到更高处
-```
+**EM 的几何直觉**：
+* **E 步 (Expectation)**：更新 $q$ 分布，使 ELBO 曲线在当前点 $\theta_{\text{old}}$ 处紧贴真实的对数似然 $\ell(\theta_{\text{old}})$。
+* **M 步 (Maximization)**：更新 $\theta$，通过最大化该 ELBO 曲线找到其顶峰 $\theta_{\text{new}}$，从而将真实对数似然 $\ell(\theta)$ 推向更高点。
 
 ### 2.2 E 步（Expectation）：使下界紧贴
 
@@ -107,34 +128,19 @@ $$= \ell(\theta^{(t)}) \quad \text{(E 步消除间隙)}$$
 
 ## 三、EM 算法流程图
 
-```
-  ┌─────────────────────────────────────────────────────────┐
-  │                   EM 算法通用框架                        │
-  ├─────────────────────────────────────────────────────────┤
-  │                                                          │
-  │  输入: 观测数据 X, 模型 p(X,Z|θ), 初始参数 θ^(0)         │
-  │                                                          │
-  │  t ← 0                                                   │
-  │  ┌──────────────────────────────────────┐                │
-  │  │ while 未收敛:                         │                │
-  │  │                                       │                │
-  │  │  ┌─────────────────────────────────┐  │                │
-  │  │  │ E 步 (Expectation):              │  │                │
-  │  │  │ 计算后验分布 q(Z) = p(Z|X,θ^(t))  │  │                │
-  │  │  │ 计算 Q(θ|θ^(t)) = E_q[log p(X,Z|θ)]│  │                │
-  │  │  └─────────────────────────────────┘  │                │
-  │  │                                       │                │
-  │  │  ┌─────────────────────────────────┐  │                │
-  │  │  │ M 步 (Maximization):             │  │                │
-  │  │  │ θ^(t+1) = arg max_θ Q(θ|θ^(t))   │  │                │
-  │  │  └─────────────────────────────────┘  │                │
-  │  │                                       │                │
-  │  │  t ← t + 1                            │                │
-  │  │                                       │                │
-  │  └──────────────────────────────────────┘                │
-  │                                                          │
-  │  输出: θ^*, 后验分布 q(Z)                                 │
-  └─────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TD
+    Start["输入: 观测数据 X, 模型 p(X,Z|θ), 初始参数 θ^(0)"] --> Init["初始化 t = 0"]
+    Init --> Loop["while 未收敛:"]
+    
+    Loop --> EStep["E 步 (Expectation):<br/>1. 计算后验分布 q(Z) = p(Z|X, θ^(t))<br/>2. 计算 Q(θ|θ^(t)) = E_q[log p(X,Z|θ)]"]
+    EStep --> MStep["M 步 (Maximization):<br/>θ^(t+1) = arg max_θ Q(θ|θ^(t))"]
+    
+    MStep --> Inc["t = t + 1"]
+    Inc --> Check{"已收敛 ?"}
+    
+    Check -->|否| Loop
+    Check -->|是| Output["输出: θ^*, 后验分布 q(Z)"]
 ```
 
 ---

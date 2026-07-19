@@ -121,27 +121,54 @@ void main()
 
 #### (1) 几何模型示意图
 
-```
-                光源 (Position)
-                     ▲
-                    /│\
-                   / │ \
-                  /  │  \
-                 /   │   \
-                / ──►│◄── \  内锥角 (cutOff): 核心高亮区 (Intensity = 1.0)
-               /    /│\    \
-              /    / │ \    \
-             /    /  │  \    \
-            /    /   │   \    \
-           / ──►/◄───┼────►\◄──\ 外锥角 (outerCutOff): 光线消失边界 (Intensity = 0.0)
-          /    /     │     \    \
-         /    /      │      \    \
-        /    /       │       \    \
-  ─────┴────┴────────┴────────┴────┴───── 照射面
-       ▲    ▲                 ▲    ▲
-      全暗  │◄── 渐变过渡区 ──►│  全暗
-            (Intensity: 0.0 ~ 1.0)
-```
+
+<svg viewBox="0 0 600 240" width="100%" style="background-color: transparent; font-family: sans-serif; margin: 20px 0; overflow: visible;">
+  <!-- Light source -->
+  <g transform="translate(300, 30)">
+  <circle cx="0" cy="0" r="10" fill="#faad14" />
+  <circle cx="0" cy="0" r="18" fill="none" stroke="#faad14" stroke-width="1" stroke-dasharray="2 2" />
+  <text x="0" y="-22" text-anchor="middle" font-size="12" fill="currentColor">光源 (Position)</text>
+  </g>
+  <!-- Cones -->
+  <!-- Outer Cone Boundary -->
+  <line x1="300" y1="30" x2="140" y2="180" stroke="#f5222d" stroke-width="1.5" stroke-dasharray="3 2" />
+  <line x1="300" y1="30" x2="460" y2="180" stroke="#f5222d" stroke-width="1.5" stroke-dasharray="3 2" />
+  <text x="110" y="160" font-size="11" fill="#f5222d">外锥 (outerCutOff)</text>
+  <!-- Inner Cone Boundary -->
+  <line x1="300" y1="30" x2="220" y2="180" stroke="#1677ff" stroke-width="2" />
+  <line x1="300" y1="30" x2="380" y2="180" stroke="#1677ff" stroke-width="2" />
+  <text x="210" y="100" font-size="11" fill="#1677ff">内锥 (cutOff)</text>
+  <!-- Center axis line -->
+  <line x1="300" y1="30" x2="300" y2="180" stroke="currentColor" stroke-width="1.2" stroke-dasharray="4 4" opacity="0.6" />
+  <!-- Illumination Surface -->
+  <line x1="80" y1="180" x2="520" y2="180" stroke="currentColor" stroke-width="2.5" />
+  <text x="500" y="196" font-size="12" fill="currentColor">照射面</text>
+  <!-- Regions and Intensity Labels -->
+  <!-- Inner cone (Full bright) -->
+  <polygon points="300,30 220,180 380,180" fill="rgba(250, 219, 20, 0.15)" />
+  <text x="300" y="150" text-anchor="middle" font-size="11" fill="#faad14">高亮区 (Intensity = 1.0)</text>
+  <!-- Falloff regions -->
+  <polygon points="300,30 140,180 220,180" fill="url(#grad-left-spotlight)" />
+  <polygon points="300,30 380,180 460,180" fill="url(#grad-right-spotlight)" />
+  <text x="180" y="205" text-anchor="middle" font-size="11" fill="#f5222d">渐变羽化区 (1.0 ~ 0.0)</text>
+  <text x="420" y="205" text-anchor="middle" font-size="11" fill="#f5222d">渐变羽化区 (1.0 ~ 0.0)</text>
+  <text x="100" y="205" text-anchor="middle" font-size="11" fill="var(--vp-c-text-3)">全暗 (0.0)</text>
+  <text x="500" y="205" text-anchor="middle" font-size="11" fill="var(--vp-c-text-3)">全暗 (0.0)</text>
+  <!-- Definitions of gradients -->
+  <defs>
+  <!-- Left falloff gradient: from outer (dark) to inner (bright) -->
+  <linearGradient id="grad-left-spotlight" x1="0%" y1="0%" x2="100%" y2="0%">
+  <stop offset="0%" stop-color="#faad14" stop-opacity="0" />
+  <stop offset="100%" stop-color="#faad14" stop-opacity="0.12" />
+  </linearGradient>
+  <!-- Right falloff gradient: from inner (bright) to outer (dark) -->
+  <linearGradient id="grad-right-spotlight" x1="0%" y1="0%" x2="100%" y2="0%">
+  <stop offset="0%" stop-color="#faad14" stop-opacity="0.12" />
+  <stop offset="100%" stop-color="#faad14" stop-opacity="0" />
+  </linearGradient>
+  </defs>
+</svg>
+
 
 #### (2) 为什么使用余弦值？
 在 Shader 中，为了避免昂贵的反三角函数（如 `acos`）计算，我们把所有的角度（$\theta$、内锥角 $\phi_{in}$、外锥角 $\phi_{out}$）全部转换为其**余弦值（Cosine）**：
@@ -166,19 +193,64 @@ $$I = \text{clamp}\left(\frac{\cos\theta - \cos\phi_{out}}{\cos\phi_{in} - \cos\
 
 文章在镜面反射（Specular）的计算中，提供了两种经典的实现方式，它们的区别如下：
 
-```
-     【经典 Phong 镜面反射】                   【Blinn-Phong 镜面反射】
-             法线 N                                    法线 N
-               ▲                                         ▲
-         \     │     /                             \     │  /     /
-  入射光  \    │    /  反射光               入射光  \    │ /半角 /  视线
-   Dir     \   │   /    Reflect              Dir     \   │/  H  /   View
-  ──────────►\─┼─►/─────────────►               ──────►\─┼─────►/─────────►
-              \│/                                       \│/
-             表面                                      表面
-         反射角与视角的夹角                        法线与半角向量的夹角
-          dot(View, Reflect)                         dot(Normal, H)
-```
+
+<svg viewBox="0 0 600 220" width="100%" style="background-color: transparent; font-family: sans-serif; margin: 20px 0; overflow: visible;">
+  <!-- Phong Model (Left) -->
+  <g transform="translate(40, 20)">
+  <text x="110" y="10" text-anchor="middle" font-size="14" fill="currentColor">Phong 镜面反射</text>
+  <line x1="10" y1="160" x2="210" y2="160" stroke="currentColor" stroke-width="2" />
+  <text x="110" y="178" text-anchor="middle" font-size="11" fill="var(--vp-c-text-3)">表面</text>
+  <line x1="110" y1="160" x2="110" y2="60" stroke="#f5222d" stroke-width="2" marker-end="url(#phong-arrow-red)" />
+  <text x="110" y="48" text-anchor="middle" font-size="11" fill="#f5222d">法线 N</text>
+  <line x1="40" y1="90" x2="110" y2="160" stroke="#1677ff" stroke-width="2" />
+  <line x1="40" y1="90" x2="75" y2="125" stroke="#1677ff" stroke-width="2" marker-end="url(#phong-arrow-blue)" />
+  <text x="35" y="80" font-size="11" fill="#1677ff">入射光 L</text>
+  <line x1="110" y1="160" x2="180" y2="90" stroke="#fa8c16" stroke-width="2" marker-end="url(#phong-arrow-orange)" />
+  <text x="185" y="80" font-size="11" fill="#fa8c16">反射光 R</text>
+  <line x1="110" y1="160" x2="200" y2="105" stroke="#52c41a" stroke-width="2" marker-end="url(#phong-arrow-green)" />
+  <text x="205" y="100" font-size="11" fill="#52c41a">视线 V</text>
+  <path d="M 160,110 A 30,30 0 0,0 175,120" fill="none" stroke="#fa8c16" stroke-width="1.5" stroke-dasharray="2 2" />
+  <text x="180" y="135" font-size="10" fill="#fa8c16">α</text>
+  <text x="110" y="200" text-anchor="middle" font-size="11" fill="var(--vp-c-text-2)">以反射角 R 和视线 V 的夹角 α 计算</text>
+  </g>
+  <!-- Blinn-Phong Model (Right) -->
+  <g transform="translate(340, 20)">
+  <text x="110" y="10" text-anchor="middle" font-size="14" fill="currentColor">Blinn-Phong 镜面反射</text>
+  <line x1="10" y1="160" x2="210" y2="160" stroke="currentColor" stroke-width="2" />
+  <text x="110" y="178" text-anchor="middle" font-size="11" fill="var(--vp-c-text-3)">表面</text>
+  <line x1="110" y1="160" x2="110" y2="60" stroke="#f5222d" stroke-width="2" marker-end="url(#phong-arrow-red)" />
+  <text x="110" y="48" text-anchor="middle" font-size="11" fill="#f5222d">法线 N</text>
+  <line x1="40" y1="90" x2="110" y2="160" stroke="#1677ff" stroke-width="2" />
+  <line x1="40" y1="90" x2="75" y2="125" stroke="#1677ff" stroke-width="2" marker-end="url(#phong-arrow-blue)" />
+  <text x="35" y="80" font-size="11" fill="#1677ff">入射光 L</text>
+  <line x1="110" y1="160" x2="200" y2="105" stroke="#52c41a" stroke-width="2" marker-end="url(#phong-arrow-green)" />
+  <text x="205" y="100" font-size="11" fill="#52c41a">视线 V</text>
+  <line x1="110" y1="160" x2="140" y2="70" stroke="#722ed1" stroke-width="2.5" marker-end="url(#phong-arrow-purple)" />
+  <text x="145" y="65" font-size="11" fill="#722ed1">半角 H</text>
+  <path d="M 110,110 A 50,50 0 0,1 125,115" fill="none" stroke="#722ed1" stroke-width="1.5" stroke-dasharray="2 2" />
+  <text x="123" y="132" font-size="10" fill="#722ed1">θ</text>
+  <text x="110" y="200" text-anchor="middle" font-size="11" fill="var(--vp-c-text-2)">以法线 N 和半角 H 的夹角 θ 计算</text>
+  </g>
+  <!-- Markers definitions -->
+  <defs>
+  <marker id="phong-arrow-red" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+  <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#f5222d" />
+  </marker>
+  <marker id="phong-arrow-blue" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+  <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#1677ff" />
+  </marker>
+  <marker id="phong-arrow-orange" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+  <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#fa8c16" />
+  </marker>
+  <marker id="phong-arrow-green" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+  <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#52c41a" />
+  </marker>
+  <marker id="phong-arrow-purple" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+  <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#722ed1" />
+  </marker>
+  </defs>
+</svg>
+
 
 #### 关键区别总结
 
@@ -210,35 +282,17 @@ $$I_{att} = \frac{1.0}{K_c + K_l \cdot d + K_q \cdot d^2}$$
 
 最终的片段颜色合成逻辑如下：
 
-```
-                      [ 顶点输入与环境数据 ]
-                                │
-                                ▼
-                       [ 基础属性分量计算 ]
-                     ┌──────────┴──────────┐
-                     ▼                     ▼
-               环境光 Ambient        漫反射 Diffuse
-                     │                     │
-                     │                     ▼
-                     │               镜面高光 Specular (Blinn-Phong)
-                     │                     │
-                     │                     ▼
-                     │              [ 聚光灯光锥计算 ]
-                     │              计算 theta 夹角余弦
-                     │                     │
-                     │                     ▼
-                     │              计算过渡强度系数 Intensity
-                     │              (仅作用于 Diffuse 和 Specular)
-                     │                     │
-                     │   ┌─────────────────┘
-                     ▼   ▼
-                  [ 距离衰减 Attenuation 计算 ]
-                  计算距离 d, 应用 1 / (c + l*d + q*d^2)
-                  (作用于 Ambient, Diffuse, Specular 所有分量)
-                                │
-                                ▼
-                         [ 最终颜色相加合成 ]
-                 Result = Ambient + Diffuse + Specular
+```mermaid
+flowchart TD
+    A["顶点输入与环境数据"] --> B["基础属性分量计算"]
+    B --> C["环境光 Ambient"]
+    B --> D["漫反射 Diffuse"]
+    D --> E["镜面高光 Specular<br/>(Blinn-Phong)"]
+    E --> F["聚光灯光锥计算<br/>计算 theta 夹角余弦"]
+    F --> G["过渡强度系数 Intensity<br/>仅作用于漫反射与高光"]
+    C --> H["距离衰减 Attenuation<br/>1 / (c + l·d + q·d²)<br/>作用于所有分量"]
+    G --> H
+    H --> I["最终颜色相加合成<br/>Result = Ambient +<br/>Diffuse + Specular"]
 ```
 
 通过这一套完整的计算流程，不仅可以展现出聚光灯特有的光圈效果，同时让光圈的边缘具备极其自然的毛玻璃/柔和羽化过渡，完美模拟了现实生活中的手电筒及探照灯特性。

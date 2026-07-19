@@ -65,8 +65,9 @@ npm run docs:dev
 
 配置完成后，您的日常写作发布工作流将变得极其顺畅：
 
-```
- Obsidian / VSCode 编辑文章 ──► 本地预览确认 ──► Git Push ──► Vercel 自动重新构建部署
+```mermaid
+flowchart LR
+    A["Obsidian / VSCode 编辑文章"] --> B["本地预览确认"] --> C["Git Push"] --> D["Vercel 自动重新构建部署"]
 ```
 
 1. **编辑文章**：在 Obsidian 中创建或编辑 `blog/` 目录下的 Markdown 笔记。

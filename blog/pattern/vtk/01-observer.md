@@ -78,11 +78,11 @@ vtkTypeBool InvokeEvent(unsigned long event, void* callData = nullptr);
 
 ### ModifiedEvent 与渲染
 
-```
-polyData->Modified()
-  → mapper->Modified()
-  → actor->Modified()
-  → （应用层 observer）renderWindow->Render()
+```mermaid
+flowchart TD
+    A["polyData->Modified()"] --> B["mapper->Modified()"]
+    B --> C["actor->Modified()"]
+    C --> D["应用层 observer<br/>renderWindow->Render()"]
 ```
 
 数据变化通过观察者链驱动视图更新，而非轮询 `GetMTime()`。

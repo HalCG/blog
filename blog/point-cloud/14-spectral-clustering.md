@@ -76,22 +76,56 @@ $$\text{Ncut}(A, \bar{A}) = \frac{\text{cut}(A, \bar{A})}{\text{vol}(A)} + \frac
 
 ### 2.3 Laplacian 特征向量的物理直觉
 
-```
-  Laplacian 特征向量的几何意义
+<svg viewBox="0 0 500 180" width="100%" style="background-color: transparent; font-family: sans-serif; margin: 20px 0; overflow: visible;">
+  <!-- Nodes (Left Cluster - Negative values - blue shades) -->
+  <g stroke="currentColor" stroke-width="1">
+  <line x1="80" y1="50" x2="110" y2="70" opacity="0.6" />
+  <line x1="80" y1="50" x2="60" y2="100" opacity="0.6" />
+  <line x1="110" y1="70" x2="120" y2="120" opacity="0.6" />
+  <line x1="60" y1="100" x2="120" y2="120" opacity="0.6" />
+  <line x1="60" y1="100" x2="90" y2="140" opacity="0.6" />
+  <line x1="120" y1="120" x2="90" y2="140" opacity="0.6" />
+  </g>
+  <!-- Nodes (Right Cluster - Positive values - red/orange shades) -->
+  <g stroke="currentColor" stroke-width="1">
+  <line x1="380" y1="50" x2="350" y2="80" opacity="0.6" />
+  <line x1="380" y1="50" x2="410" y2="100" opacity="0.6" />
+  <line x1="350" y1="80" x2="340" y2="130" opacity="0.6" />
+  <line x1="410" y1="100" x2="340" y2="130" opacity="0.6" />
+  <line x1="410" y1="100" x2="380" y2="140" opacity="0.6" />
+  <line x1="340" y1="130" x2="380" y2="140" opacity="0.6" />
+  </g>
+  <!-- Graph Cut Edges (crossing between clusters) -->
+  <line x1="120" y1="120" x2="340" y2="130" stroke="#f5222d" stroke-width="1.5" stroke-dasharray="3 3" />
+  <line x1="110" y1="70" x2="350" y2="80" stroke="#f5222d" stroke-width="1.5" stroke-dasharray="3 3" />
+  <!-- Cut line representation -->
+  <path d="M 230,30 C 230,80 230,120 220,160" fill="none" stroke="#f5222d" stroke-width="2" stroke-dasharray="5 5" />
+  <text x="240" y="45" font-size="12" fill="#f5222d">最小割 (Min-Cut)</text>
+  <!-- Left Cluster Nodes colored by Fiedler Vector Value -->
+  <circle cx="80" cy="50" r="7" fill="#1677ff" />
+  <text x="80" y="40" text-anchor="middle" font-size="9" fill="#1677ff">-0.3</text>
+  <circle cx="110" cy="70" r="7" fill="#4096ff" />
+  <text x="110" y="60" text-anchor="middle" font-size="9" fill="#4096ff">-0.2</text>
+  <circle cx="60" cy="100" r="7" fill="#1677ff" />
+  <text x="60" y="90" text-anchor="middle" font-size="9" fill="#1677ff">-0.3</text>
+  <circle cx="120" cy="120" r="7" fill="#69b1ff" />
+  <text x="120" y="110" text-anchor="middle" font-size="9" fill="#69b1ff">-0.1</text>
+  <circle cx="90" cy="140" r="7" fill="#0958d9" />
+  <text x="90" y="152" text-anchor="middle" font-size="9" fill="#0958d9">-0.4</text>
+  <!-- Right Cluster Nodes colored by Fiedler Vector Value -->
+  <circle cx="380" cy="50" r="7" fill="#ff4d4f" />
+  <text x="380" y="40" text-anchor="middle" font-size="9" fill="#ff4d4f">+0.3</text>
+  <circle cx="350" cy="80" r="7" fill="#ff7875" />
+  <text x="350" y="70" text-anchor="middle" font-size="9" fill="#ff7875">+0.1</text>
+  <circle cx="410" cy="100" r="7" fill="#ff4d4f" />
+  <text x="410" y="90" text-anchor="middle" font-size="9" fill="#ff4d4f">+0.3</text>
+  <circle cx="340" cy="130" r="7" fill="#ffa39e" />
+  <text x="340" y="120" text-anchor="middle" font-size="9" fill="#ffa39e">0.0</text>
+  <circle cx="380" cy="140" r="7" fill="#ff4d4f" />
+  <text x="380" y="152" text-anchor="middle" font-size="9" fill="#ff4d4f">+0.3</text>
+  <text x="250" y="175" text-anchor="middle" font-size="11" fill="var(--vp-c-text-2)">Fiedler 特征向量 f₂ 的正负符号天然对应了图的最优二分切割线</text>
+</svg>
 
-  特征向量 f₂ (Fiedler 向量) 的值沿图的主要"切开"方向变化:
-
-    f₂ 值:
-    ┌─────────────────────┐
-    │ -0.3  -0.2   0.1  0.3│   ← f₂ 的正负值天然分割了两个簇
-    │ -0.3  -0.1   0.1  0.3│
-    │ -0.2   0.0   0.2  0.3│
-    │          ────cut────  │
-    │ -0.4  -0.3  -0.1  0.0│
-    └─────────────────────┘
-
-  通过 f₂ 的符号即可找到一个"近最优"的图割。
-```
 
 ---
 
@@ -99,32 +133,15 @@ $$\text{Ncut}(A, \bar{A}) = \frac{\text{cut}(A, \bar{A})}{\text{vol}(A)} + \frac
 
 ### 3.1 完整算法
 
-```
-  ┌───────────────────────────────────────────────────┐
-  │            谱聚类算法 (Spectral Clustering)         │
-  ├───────────────────────────────────────────────────┤
-  │                                                    │
-  │  输入: N 个数据点, 簇数 K                           │
-  │                                                    │
-  │  1. 构建相似度图 (KNN 或 ε-邻域)                     │
-  │     ┌──── W_ij = exp(-||p_i-p_j||²/(2σ²))          │
-  │     └──── 仅 K 近邻或距离 < ε 的边非零               │
-  │                                                    │
-  │  2. 计算度矩阵 D 和 Laplacian L = D - W              │
-  │                                                    │
-  │  3. 计算 L 的前 K 个最小的特征值对应的特征向量         │
-  │     f₁, f₂, ..., f_K  (每个是 N × 1)               │
-  │                                                    │
-  │  4. 用 K 个特征向量构造 N × K 矩阵:                   │
-  │     U = [f₁, f₂, ..., f_K]                         │
-  │                                                    │
-  │  5. 对 U 的每一行做 L₂ 归一化:                        │
-  │     u_i ← u_i / ||u_i||₂                            │
-  │                                                    │
-  │  6. 在归一化后的 U 矩阵上执行 K-Means                  │
-  │                                                    │
-  │  输出: 每个点的聚类标签                               │
-  └───────────────────────────────────────────────────┘
+```mermaid
+flowchart TD
+    A["输入: N 个数据点, 簇数 K"] --> B["1. 构建相似度图 (KNN 或 ε-邻域)<br/>W_ij = exp(-||p_i-p_j||²/(2σ²))"]
+    B --> C["2. 计算度矩阵 D 和 Laplacian L = D - W"]
+    C --> D["3. 计算 L 的前 K 个最小的特征值对应的特征向量<br/>f₁, f₂, ..., f_K"]
+    D --> E["4. 用 K 个特征向量构造 N × K 矩阵:<br/>U = [f₁, f₂, ..., f_K]"]
+    E --> F["5. 对 U 的每一行做 L₂ 归一化:<br/>u_i ← u_i / ||u_i||₂"]
+    F --> G["6. 在归一化后的 U 矩阵上执行 K-Means"]
+    G --> H["输出: 每个点的聚类标签"]
 ```
 
 ### 3.2 Python 实现

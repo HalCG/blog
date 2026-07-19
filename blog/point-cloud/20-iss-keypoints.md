@@ -42,29 +42,30 @@ $$\gamma_{21} = \frac{\lambda_2}{\lambda_1}, \quad \gamma_{32} = \frac{\lambda_3
 
 ## 二、ISS 算法流程
 
-```
-  ┌──────────────────────────────────────────────────────┐
-  │            ISS 关键点检测算法                          │
-  ├──────────────────────────────────────────────────────┤
-  │                                                       │
-  │  输入: 点云 P, 邻域半径 r (或 KNN),                     │
-  │        阈值 γ₂₁_th, γ₃₂_th, NMS 半径                   │
-  │                                                       │
-  │  对每个点 p_i ∈ P:                                     │
-  │    1. 找到半径 r 内的所有邻域点 N_i                      │
-  │    2. 如果 |N_i| < min_neighbors → 跳过                 │
-  │    3. 计算邻域的加权协方差矩阵 Σ_i:                      │
-  │       Σ_i = Σ_j w_j (p_j - p̄_i)(p_j - p̄_i)^T           │
-  │       w_j = 1 / |N_i|  (均匀权重)                       │
-  │    4. 特征值分解: λ₁ ≤ λ₂ ≤ λ₃                         │
-  │    5. 计算比率: γ₂₁ = λ₂/λ₁, γ₃₂ = λ₃/λ₂               │
-  │    6. 如果 γ₂₁ ≥ γ₂₁_th AND γ₃₂ ≤ γ₃₂_th → 候选关键点   │
-  │                                                       │
-  │  对所有候选关键点执行 Non-Maximum Suppression:           │
-  │    保留局部邻域内 λ₃ 值最大的候选点                       │
-  │                                                       │
-  │  输出: 关键点索引列表                                   │
-  └──────────────────────────────────────────────────────┘
+```mermaid
+flowchart TD
+    Start["输入: 点云 P, 邻域半径 r, 阈值 γ₂₁_th, γ₃₂_th, NMS 半径"] --> LoopPoints["对每个点 p_i ∈ P:"]
+    
+    LoopPoints --> Search["1. 找到半径 r 内的所有邻域点 N_i"]
+    Search --> CheckNeighbors{"2. |N_i| < min_neighbors ?"}
+    
+    CheckNeighbors -->|是| Skip["跳过当前点"]
+    CheckNeighbors -->|否| Cov["3. 计算邻域的加权协方差矩阵 Σ_i"]
+    
+    Cov --> Eig["4. 特征值分解: λ₁ ≤ λ₂ ≤ λ₃"]
+    Eig --> Ratio["5. 计算比率: γ₂₁ = λ₂/λ₁, γ₃₂ = λ₃/λ₂"]
+    
+    Ratio --> CheckRatio{"6. γ₂₁ ≥ γ₂₁_th 且 γ₃₂ ≥ γ₃₂_th ?"}
+    CheckRatio -->|否| Skip
+    CheckRatio -->|是| Candidate["归为候选关键点，记录其 λ₃"]
+    
+    Skip --> CheckNext{"还有未处理点 ?"}
+    Candidate --> CheckNext
+    
+    CheckNext -->|是| LoopPoints
+    
+    CheckNext -->|否| NMS["对所有候选关键点执行 Non-Maximum Suppression (NMS):<br/>在抑制半径内仅保留 λ₃ 最大的候选点"]
+    NMS --> End["输出: 关键点索引列表"]
 ```
 
 ---
@@ -235,21 +236,54 @@ def open3d_iss_demo(pcd):
 
 ## 六、ISS vs Harris 3D 实验对比
 
-```
-  不同检测器在同一点云上的表现
-
-  原始点云               Harris 3D               ISS
-  ┌──────────────┐     ┌──────────────┐     ┌──────────────┐
-  │  ···         │     │              │     │              │
-  │ ·   ·        │     │   ●      ●   │     │  ●    ●   ●  │
-  │  · ·  ···   │     │        ●     │     │    ●     ●    │
-  │ ·    ·   ·  │     │    ●         │     │  ●   ●    ●   │
-  │  ···  · ·   │     │  ●       ●   │     │    ●      ●   │
-  └──────────────┘     └──────────────┘     └──────────────┘
-
-  关键点聚类在边缘区域   关键点在平面区域稀疏     关键点均匀分布
-  且对噪声敏感                                  且抗噪性强
-```
+<svg viewBox="0 0 600 180" width="100%" style="background-color: transparent; font-family: sans-serif; margin: 20px 0; overflow: visible;">
+  <!-- Original Point Cloud (Left) -->
+  <g transform="translate(40, 20)">
+  <rect x="0" y="20" width="140" height="100" fill="rgba(100, 100, 100, 0.05)" stroke="var(--vp-c-divider)" stroke-width="1.5" rx="6" />
+  <text x="70" y="10" text-anchor="middle" font-size="13" fill="currentColor">原始点云</text>
+  <!-- Surface outline points in grey -->
+  <g fill="var(--vp-c-text-3)" opacity="0.6">
+  <circle cx="20" cy="50" r="2" /><circle cx="35" cy="40" r="2" /><circle cx="50" cy="35" r="2" />
+  <circle cx="70" cy="35" r="2" /><circle cx="90" cy="40" r="2" /><circle cx="110" cy="50" r="2" />
+  <circle cx="120" cy="70" r="2" /><circle cx="110" cy="90" r="2" /><circle cx="90" cy="100" r="2" />
+  <circle cx="70" cy="105" r="2" /><circle cx="50" cy="100" r="2" /><circle cx="35" cy="90" r="2" />
+  <circle cx="20" cy="70" r="2" />
+  <!-- Inner points -->
+  <circle cx="50" cy="65" r="2" /><circle cx="70" cy="70" r="2" /><circle cx="90" cy="65" r="2" />
+  <circle cx="60" cy="85" r="2" /><circle cx="80" cy="85" r="2" />
+  </g>
+  <text x="70" y="140" text-anchor="middle" font-size="11" fill="var(--vp-c-text-2)">存在噪声和边缘不均</text>
+  </g>
+  <!-- Harris 3D (Middle) -->
+  <g transform="translate(230, 20)">
+  <rect x="0" y="20" width="140" height="100" fill="rgba(100, 100, 100, 0.05)" stroke="var(--vp-c-divider)" stroke-width="1.5" rx="6" />
+  <text x="70" y="10" text-anchor="middle" font-size="13" fill="currentColor">Harris 3D</text>
+  <!-- Points clustered strictly on high curvature / edges (red) -->
+  <g fill="#f5222d">
+  <circle cx="20" cy="50" r="4.5" />
+  <circle cx="110" cy="50" r="4.5" />
+  <circle cx="20" cy="70" r="4.5" />
+  <circle cx="120" cy="70" r="4.5" />
+  <circle cx="70" cy="105" r="4.5" />
+  </g>
+  <text x="70" y="140" text-anchor="middle" font-size="11" fill="#f5222d">聚类于高曲率边缘且对噪敏感</text>
+  </g>
+  <!-- ISS (Right) -->
+  <g transform="translate(420, 20)">
+  <rect x="0" y="20" width="140" height="100" fill="rgba(100, 100, 100, 0.05)" stroke="var(--vp-c-divider)" stroke-width="1.5" rx="6" />
+  <text x="70" y="10" text-anchor="middle" font-size="13" fill="currentColor">ISS (固有形状)</text>
+  <!-- Points evenly distributed on features (green) -->
+  <g fill="#52c41a">
+  <circle cx="35" cy="40" r="4.5" />
+  <circle cx="70" cy="35" r="4.5" />
+  <circle cx="90" cy="40" r="4.5" />
+  <circle cx="50" cy="65" r="4.5" />
+  <circle cx="90" cy="65" r="4.5" />
+  <circle cx="70" cy="105" r="4.5" />
+  </g>
+  <text x="70" y="140" text-anchor="middle" font-size="11" fill="#52c41a">特征点均匀分布，抗噪性强</text>
+  </g>
+</svg>
 
 | 维度 | Harris 3D | ISS |
 |------|-----------|-----|

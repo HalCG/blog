@@ -68,25 +68,18 @@ $$\rho = x \cos\theta + y \sin\theta$$
 
 ### 2.1 标准算法
 
-```
-  ┌──────────────────────────────────────────────┐
-  │         霍夫变换直线检测 (2D)                  │
-  ├──────────────────────────────────────────────┤
-  │                                               │
-  │  1. 离散化参数空间:                              │
-  │     ρ ∈ [0, √(W²+H²)], 分辨率 Δρ               │
-  │     θ ∈ [0, π), 分辨率 Δθ                       │
-  │     创建累加器 A[ρ_bins, θ_bins] = 0             │
-  │                                               │
-  │  2. 对每个点 (x, y):                             │
-  │     for θ in range(0, π, Δθ):                  │
-  │         ρ = x·cosθ + y·sinθ                    │
-  │         A[ρ_idx, θ_idx] += 1                   │
-  │                                               │
-  │  3. 寻找累加器中的局部极大值（峰值）              │
-  │     → 每个峰值 = 一条直线                        │
-  │                                               │
-  └──────────────────────────────────────────────┘
+```mermaid
+flowchart TD
+    Start["1. 离散化参数空间:<br/>创建累加器 A[ρ_bins, θ_bins] = 0"] --> LoopPoints["2. 对每个点 (x, y):"]
+    LoopPoints --> LoopTheta["for θ in range(0, π, Δθ):"]
+    LoopTheta --> Calc["计算 ρ = x·cosθ + y·sinθ"]
+    Calc --> Vote["累加器投票: A[ρ_idx, θ_idx] += 1"]
+    Vote --> NextTheta{"θ 遍历完 ?"}
+    NextTheta -->|否| LoopTheta
+    NextTheta -->|是| NextPoint{"点云遍历完 ?"}
+    NextPoint -->|否| LoopPoints
+    NextPoint -->|是| FindPeaks["3. 寻找累加器中的局部极大值 (峰值)"]
+    FindPeaks --> End["输出: 检测到的直线 (参数对)"]
 ```
 
 ```python
@@ -312,20 +305,63 @@ def hough_sphere_with_normals(points, normals, r_range=(0.1, 2.0), r_bins=100,
 
 ### 5.1 参数选择指南
 
-```
-  累加器分辨率的选择权衡
-
-  太粗 (低分辨率)              适中                        太细 (高分辨率)
-
-  ┌────┬────┐              ┌──┬──┬──┬──┐              ┌┬┬┬┬┬┬┬┬┐
-  │  ██│    │              │  │██│  │  │              │││██││││││
-  ├────┼────┤              ├──┼──┼──┼──┤              ├┼┼┼┼┼┼┼┼┤
-  │    │    │              │  │  │  │  │              ││││││││││
-  └────┴────┘              └──┴──┴──┴──┘              └┴┴┴┴┴┴┴┴┘
-
-  多个真实直线被            正确分辨两条直线             票数过于分散
-  合并为一个峰值                                         找不到显著峰值
-```
+<svg viewBox="0 0 600 200" width="100%" style="background-color: transparent; font-family: sans-serif; margin: 20px 0; overflow: visible;">
+  <!-- Too Coarse (Left) -->
+  <g transform="translate(40, 20)">
+  <text x="70" y="10" text-anchor="middle" font-size="13" fill="currentColor">1. 太粗 (低分辨率)</text>
+  <rect x="10" y="25" width="120" height="120" fill="none" stroke="currentColor" stroke-width="1.5" />
+  <line x1="70" y1="25" x2="70" y2="145" stroke="currentColor" stroke-width="1" />
+  <line x1="10" y1="85" x2="130" y2="85" stroke="currentColor" stroke-width="1" />
+  <rect x="10" y="25" width="60" height="60" fill="rgba(245, 34, 45, 0.4)" stroke="#f5222d" stroke-width="1.5" />
+  <circle cx="35" cy="50" r="3" fill="#f5222d" /><circle cx="45" cy="58" r="3" fill="#f5222d" />
+  <circle cx="28" cy="40" r="3" fill="#f5222d" /><circle cx="52" cy="42" r="3" fill="#f5222d" />
+  <text x="70" y="165" text-anchor="middle" font-size="11" fill="var(--vp-c-text-2)">两条直线在同一单元相加<br/>合并为一个峰值（混叠）</text>
+  </g>
+  <!-- Moderate (Middle) -->
+  <g transform="translate(230, 20)">
+  <text x="70" y="10" text-anchor="middle" font-size="13" fill="currentColor">2. 适中 (合理分辨率)</text>
+  <rect x="10" y="25" width="120" height="120" fill="none" stroke="currentColor" stroke-width="1.5" />
+  <line x1="40" y1="25" x2="40" y2="145" stroke="currentColor" stroke-width="1" />
+  <line x1="70" y1="25" x2="70" y2="145" stroke="currentColor" stroke-width="1" />
+  <line x1="100" y1="25" x2="100" y2="145" stroke="currentColor" stroke-width="1" />
+  <line x1="10" y1="55" x2="130" y2="55" stroke="currentColor" stroke-width="1" />
+  <line x1="10" y1="85" x2="130" y2="85" stroke="currentColor" stroke-width="1" />
+  <line x1="10" y1="115" x2="130" y2="115" stroke="currentColor" stroke-width="1" />
+  <rect x="40" y="25" width="30" height="30" fill="rgba(82, 196, 26, 0.3)" stroke="#52c41a" stroke-width="1.5" />
+  <circle cx="55" cy="40" r="3" fill="#52c41a" />
+  <rect x="100" y="85" width="30" height="30" fill="rgba(82, 196, 26, 0.3)" stroke="#52c41a" stroke-width="1.5" />
+  <circle cx="115" cy="100" r="3" fill="#52c41a" />
+  <text x="70" y="165" text-anchor="middle" font-size="11" fill="var(--vp-c-text-2)">两条直线各自产生独立峰值<br/>可准确分离与检测</text>
+  </g>
+  <!-- Too Fine (Right) -->
+  <g transform="translate(420, 20)">
+  <text x="70" y="10" text-anchor="middle" font-size="13" fill="currentColor">3. 太细 (高分辨率)</text>
+  <rect x="10" y="25" width="120" height="120" fill="none" stroke="currentColor" stroke-width="1.5" />
+  <g opacity="0.6">
+  <line x1="25" y1="25" x2="25" y2="145" stroke="currentColor" stroke-width="0.5" />
+  <line x1="40" y1="25" x2="40" y2="145" stroke="currentColor" stroke-width="0.5" />
+  <line x1="55" y1="25" x2="55" y2="145" stroke="currentColor" stroke-width="0.5" />
+  <line x1="70" y1="25" x2="70" y2="145" stroke="currentColor" stroke-width="0.5" />
+  <line x1="85" y1="25" x2="85" y2="145" stroke="currentColor" stroke-width="0.5" />
+  <line x1="100" y1="25" x2="100" y2="145" stroke="currentColor" stroke-width="0.5" />
+  <line x1="115" y1="25" x2="115" y2="145" stroke="currentColor" stroke-width="0.5" />
+  <line x1="10" y1="40" x2="130" y2="40" stroke="currentColor" stroke-width="0.5" />
+  <line x1="10" y1="55" x2="130" y2="55" stroke="currentColor" stroke-width="0.5" />
+  <line x1="10" y1="70" x2="130" y2="70" stroke="currentColor" stroke-width="0.5" />
+  <line x1="10" y1="85" x2="130" y2="85" stroke="currentColor" stroke-width="0.5" />
+  <line x1="10" y1="100" x2="130" y2="100" stroke="currentColor" stroke-width="0.5" />
+  <line x1="10" y1="115" x2="130" y2="115" stroke="currentColor" stroke-width="0.5" />
+  <line x1="10" y1="130" x2="130" y2="130" stroke="currentColor" stroke-width="0.5" />
+  </g>
+  <rect x="40" y="40" width="15" height="15" fill="rgba(250, 140, 22, 0.15)" stroke="#fa8c16" stroke-width="0.5" />
+  <circle cx="47" cy="47" r="2" fill="#fa8c16" />
+  <rect x="55" y="55" width="15" height="15" fill="rgba(250, 140, 22, 0.15)" stroke="#fa8c16" stroke-width="0.5" />
+  <circle cx="62" cy="62" r="2" fill="#fa8c16" />
+  <rect x="100" y="85" width="15" height="15" fill="rgba(250, 140, 22, 0.15)" stroke="#fa8c16" stroke-width="0.5" />
+  <circle cx="107" cy="92" r="2" fill="#fa8c16" />
+  <text x="70" y="165" text-anchor="middle" font-size="11" fill="var(--vp-c-text-2)">票数分散在相邻单元<br/>导致找不到明显的峰值</text>
+  </g>
+</svg>
 
 ---
 

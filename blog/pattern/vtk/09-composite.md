@@ -1,4 +1,4 @@
-﻿# VTK 设计模式：组合模式
+# VTK 设计模式：组合模式
 
 > 系列：[Qt / VTK 设计模式](../README.md) · VTK 09/10  
 > 参考：[vtkAssembly](https://vtk.org/doc/nightly/html/classvtkAssembly.html)、[vtkProp](https://vtk.org/doc/nightly/html/classvtkProp.html)
@@ -36,12 +36,12 @@ actor2->SetUserMatrix(M);  // 手动同步每个零件
 
 ### 场景图组合（渲染）
 
-```
-vtkRenderer
-  └── vtkAssembly (root)
-        ├── vtkActor (part A)
-        └── vtkAssembly (sub)
-              └── vtkActor (part B)
+```mermaid
+flowchart TD
+    Renderer["vtkRenderer"] --> Root["vtkAssembly (root)"]
+    Root --> PartA["vtkActor (part A)"]
+    Root --> Sub["vtkAssembly (sub)"]
+    Sub --> PartB["vtkActor (part B)"]
 ```
 
 `vtkAssembly::AddPart(prop)` 建立父子关系；父级 `UserMatrix` 影响子级世界坐标。

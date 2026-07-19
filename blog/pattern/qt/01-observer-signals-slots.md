@@ -31,10 +31,11 @@ Qt 用 **信号槽** 把「谁通知」和「谁处理」拆开。
 
 ## GoF 观察者结构
 
-```
-Subject  ──notify──▶ Observer A
-    │                Observer B
-    └──────────────▶ Observer C
+```mermaid
+flowchart LR
+    S["Subject"] -- notify --> A["Observer A"]
+    S -- notify --> B["Observer B"]
+    S -- notify --> C["Observer C"]
 ```
 
 | 角色 | Qt 对应 |
@@ -95,12 +96,12 @@ moc 会生成：
 
 简化调用链：
 
-```
-emit valueChanged(42)
-  → QMetaObject::activate(sender, signalIndex, argv)
-  → 遍历连接列表
-  → Direct：直接调用槽
-  → Queued：QCoreApplication::postEvent(receiver, QMetaCallEvent)
+```mermaid
+flowchart TD
+    A["emit valueChanged(42)"] --> B["QMetaObject::activate<br/>(sender, signalIndex, argv)"]
+    B --> C["遍历连接列表"]
+    C -- "Direct" --> D["直接调用槽"]
+    C -- "Queued" --> E["QCoreApplication::postEvent<br/>(receiver, QMetaCallEvent)"]
 ```
 
 ---

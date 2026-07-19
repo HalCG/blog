@@ -27,28 +27,17 @@ $$\min_{R, t} \sum_{i=1}^{N_s} \|R s_i + t - m_i\|^2$$
 
 ICP 的解决方案：**先猜对应点，再求变换；用更好的变换找更好的对应点；重复。**
 
-```
-  ┌────────────────────────────────────────────────┐
-  │               ICP 算法主循环                      │
-  ├────────────────────────────────────────────────┤
-  │                                                 │
-  │  初始化: R = I, t = 0 (或由粗配准提供)            │
-  │                                                 │
-  │  while 未收敛:                                   │
-  │                                                 │
-  │    步骤 1: 对应点搜索                              │
-  │      对每个 s_i ∈ S:                             │
-  │        变换: s_i' = R·s_i + t                     │
-  │        在 T 中找最近邻: m_i = argmin ||s_i' - t_j||│
-  │                                                 │
-  │    步骤 2: 变换估计                                │
-  │      利用对应点对 {(s_i, m_i)} 求解最优 (R, t):    │
-  │        min Σ ||R·s_i + t - m_i||²               │
-  │                                                 │
-  │    步骤 3: 收敛检查                                │
-  │      if ΔR ≈ I and Δt ≈ 0 → break              │
-  │                                                 │
-  └────────────────────────────────────────────────┘
+```mermaid
+flowchart TD
+    Start["初始化: R = I, t = 0<br/>(或由粗配准提供初始值)"] --> Loop["while 未收敛:"]
+    
+    Loop --> Step1["步骤 1: 对应点搜索<br/>1. 对每个 s_i ∈ S, 变换: s_i' = R·s_i + t<br/>2. 在 T 中找最近邻: m_i = argmin ||s_i' - t_j||"]
+    Step1 --> Step2["步骤 2: 变换估计<br/>利用对应点对 {(s_i, m_i)} 求解最优 (R_new, t_new):<br/>min Σ ||R·s_i + t - m_i||²"]
+    Step2 --> Accumulate["累积变换矩阵:<br/>R = R_new @ R<br/>t = R_new @ t + t_new"]
+    
+    Accumulate --> Check{"步骤 3: 收敛检查<br/>ΔR ≈ I 且 Δt ≈ 0 ?"}
+    Check -->|否| Loop
+    Check -->|是| End["输出: 最终变换 R, t"]
 ```
 
 ---
@@ -190,23 +179,54 @@ $$E(R, t) = \sum_{i=1}^N \left((R s_i + t - m_i) \cdot n_{m_i}\right)^2$$
 
 其中 $n_{m_i}$ 是目标点 $m_i$ 处的法向量。
 
-```
   Point-to-Point vs Point-to-Plane
-
-  Point-to-Point                    Point-to-Plane
-
-  s_i'                              s_i'
-   ●                                 ●
-    ╲                                ╲
-     ╲  d = ||s_i' - m_i||           ╲  d = (s_i' - m_i) · n
-      ╲                               ╲
-       ● m_i                     ──────●──────► 切平面
-                                      m_i       n ↑
-                                                  法向量
-
-  对平面滑动无惩罚                 正确惩罚了"离开表面"的偏移
-  收敛慢、容易陷入局部最优          收敛快、更精确
-```
+<svg viewBox="0 0 600 220" width="100%" style="background-color: transparent; font-family: sans-serif; margin: 20px 0; overflow: visible;">
+  <!-- Point-to-Point (Left) -->
+  <g transform="translate(60, 20)">
+  <text x="100" y="0" text-anchor="middle" font-size="14" fill="currentColor">Point-to-Point (点对点)</text>
+  <!-- Source point s_i' -->
+  <circle cx="60" cy="40" r="4.5" fill="#1677ff" />
+  <text x="60" y="28" text-anchor="middle" font-size="11" fill="#1677ff">s_i'</text>
+  <!-- Target point m_i -->
+  <circle cx="140" cy="120" r="4.5" fill="#fa8c16" />
+  <text x="140" y="135" text-anchor="middle" font-size="11" fill="#fa8c16">m_i</text>
+  <!-- Distance vector -->
+  <line x1="60" y1="40" x2="135" y2="115" stroke="#f5222d" stroke-width="2" marker-end="url(#arrow-red-icp)" />
+  <text x="120" y="70" font-size="12" fill="#f5222d">d = ||s_i' - m_i||</text>
+  <text x="100" y="170" text-anchor="middle" font-size="12" fill="var(--vp-c-text-2)">对平面内滑动无惩罚<br/>收敛较慢、容易陷入局部最优</text>
+  </g>
+  <!-- Point-to-Plane (Right) -->
+  <g transform="translate(340, 20)">
+  <text x="120" y="0" text-anchor="middle" font-size="14" fill="currentColor">Point-to-Plane (点对面)</text>
+  <!-- Source point s_i' -->
+  <circle cx="70" cy="40" r="4.5" fill="#1677ff" />
+  <text x="70" y="28" text-anchor="middle" font-size="11" fill="#1677ff">s_i'</text>
+  <!-- Target point m_i -->
+  <circle cx="150" cy="120" r="4.5" fill="#fa8c16" />
+  <text x="165" y="128" font-size="11" fill="#fa8c16">m_i</text>
+  <!-- Tangent Plane -->
+  <line x1="70" y1="120" x2="230" y2="120" stroke="currentColor" stroke-width="2" />
+  <text x="210" y="135" font-size="11" fill="var(--vp-c-text-2)">切平面</text>
+  <!-- Normal n -->
+  <line x1="150" y1="120" x2="150" y2="70" stroke="#52c41a" stroke-width="2" marker-end="url(#arrow-green-icp)" />
+  <text x="158" y="78" font-size="12" fill="#52c41a">n</text>
+  <!-- Projected distance (orthogonal projection onto normal) -->
+  <line x1="70" y1="40" x2="150" y2="40" stroke="#f5222d" stroke-width="1.5" stroke-dasharray="3 3" />
+  <line x1="150" y1="40" x2="150" y2="120" stroke="#f5222d" stroke-width="1.5" stroke-dasharray="3 3" />
+  <line x1="70" y1="40" x2="70" y2="120" stroke="#f5222d" stroke-width="2.5" marker-end="url(#arrow-red-icp)" />
+  <text x="15" y="85" font-size="12" fill="#f5222d">d = (s_i' - m_i) · n</text>
+  <text x="150" y="170" text-anchor="middle" font-size="12" fill="var(--vp-c-text-2)">正确惩罚了“离开表面”的垂直偏移<br/>收敛快、在面状场景中极精确</text>
+  </g>
+  <!-- Markers -->
+  <defs>
+  <marker id="arrow-red-icp" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+  <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#f5222d" />
+  </marker>
+  <marker id="arrow-green-icp" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+  <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#52c41a" />
+  </marker>
+  </defs>
+</svg>
 
 ### 3.2 线性近似求解
 

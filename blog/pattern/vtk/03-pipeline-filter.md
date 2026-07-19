@@ -30,8 +30,9 @@ show(mesh);
 
 VTK Pipeline 更接近 **Pipe and Filter** 架构，而非 GoF 的 Command：
 
-```
-[Source] → [Filter] → [Filter] → [Mapper] → [Actor]
+```mermaid
+flowchart LR
+    A[Source] --> B[Filter] --> C[Filter] --> D[Mapper] --> E[Actor]
 ```
 
 | 概念 | 说明 |

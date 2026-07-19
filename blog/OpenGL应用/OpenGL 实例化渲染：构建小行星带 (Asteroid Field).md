@@ -14,14 +14,16 @@
 - **实例化方式（单 Draw Call）**：调用 `glDrawElementsInstanced` 仅 1 次。
   我们将 10 万个小行星的变换矩阵一次性打包上传到显存中，然后发出一条绘制命令，告诉 GPU：“请使用这个基础网格，并根据我上传的 10 万个矩阵，绘制 10 万个实例。”
 
-```
-传统渲染方式:
-[CPU] ─Draw 1─> [GPU]
-[CPU] ─Draw 2─> [GPU]
-... (重复10万次，CPU瓶颈严重)
-
-实例化渲染方式:
-[CPU] ─一次性上传 100,000 个矩阵并调用 DrawInstanced 1次─> [GPU] (极高的渲染效率)
+```mermaid
+flowchart LR
+    subgraph T["传统渲染方式"]
+        C1["CPU"] -- "Draw 1" --> G1["GPU"]
+        C1 -- "Draw 2" --> G1
+        C1 -- "……重复 10 万次<br/>（CPU 瓶颈严重）" --> G1
+    end
+    subgraph I["实例化渲染方式"]
+        C2["CPU"] -- "一次性上传 100,000 个矩阵<br/>调用 DrawInstanced 1 次" --> G2["GPU<br/>（极高的渲染效率）"]
+    end
 ```
 
 ---

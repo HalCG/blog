@@ -15,21 +15,69 @@ ICP 需要在每一次迭代中为每个源点找到目标点云中的最近点�
 
 NDT 将目标点云所在的 3D 空间划分为规则的体素网格，在每个体素内用一个 3D 高斯分布来概括该体素内所有点的概率分布：
 
-```
-  目标点云的体素化 + 高斯拟合
 
-  原始目标点云                体素网格划分                 每个体素 = 一个高斯分布
+<svg viewBox="0 0 600 180" width="100%" style="background-color: transparent; font-family: sans-serif; margin: 20px 0; overflow: visible;">
+  <!-- Original Point Cloud (Left) -->
+  <g transform="translate(40, 20)">
+  <rect x="0" y="20" width="120" height="90" fill="rgba(100, 100, 100, 0.05)" stroke="var(--vp-c-divider)" stroke-width="1" rx="4" />
+  <text x="60" y="10" text-anchor="middle" font-size="12" fill="currentColor">1. 原始目标点云</text>
+  <circle cx="30" cy="40" r="2" fill="var(--vp-c-text-3)" />
+  <circle cx="35" cy="45" r="2" fill="var(--vp-c-text-3)" />
+  <circle cx="28" cy="50" r="2" fill="var(--vp-c-text-3)" />
+  <circle cx="45" cy="38" r="2" fill="var(--vp-c-text-3)" />
+  <circle cx="90" cy="80" r="2" fill="var(--vp-c-text-3)" />
+  <circle cx="85" cy="85" r="2" fill="var(--vp-c-text-3)" />
+  <circle cx="95" cy="75" r="2" fill="var(--vp-c-text-3)" />
+  <circle cx="70" cy="50" r="2" fill="var(--vp-c-text-3)" />
+  <circle cx="65" cy="55" r="2" fill="var(--vp-c-text-3)" />
+  </g>
+  <!-- Arrow 1 -->
+  <g transform="translate(170, 20)">
+  <line x1="0" y1="65" x2="30" y2="65" stroke="currentColor" stroke-width="1.5" marker-end="url(#ndt-arrow)" />
+  </g>
+  <!-- Grid division (Middle) -->
+  <g transform="translate(210, 20)">
+  <text x="60" y="10" text-anchor="middle" font-size="12" fill="currentColor">2. 体素网格划分</text>
+  <rect x="0" y="20" width="120" height="90" fill="none" stroke="currentColor" stroke-width="1.5" rx="4" />
+  <line x1="40" y1="20" x2="40" y2="110" stroke="currentColor" stroke-dasharray="2 2" stroke-width="1" />
+  <line x1="80" y1="20" x2="80" y2="110" stroke="currentColor" stroke-dasharray="2 2" stroke-width="1" />
+  <line x1="0" y1="50" x2="120" y2="50" stroke="currentColor" stroke-dasharray="2 2" stroke-width="1" />
+  <line x1="0" y1="80" x2="120" y2="80" stroke="currentColor" stroke-dasharray="2 2" stroke-width="1" />
+  <circle cx="20" cy="35" r="2" fill="#1677ff" />
+  <circle cx="25" cy="40" r="2" fill="#1677ff" />
+  <circle cx="60" cy="65" r="2" fill="#1677ff" />
+  <circle cx="58" cy="72" r="2" fill="#1677ff" />
+  <circle cx="100" cy="95" r="2" fill="#1677ff" />
+  <circle cx="105" cy="92" r="2" fill="#1677ff" />
+  </g>
+  <!-- Arrow 2 -->
+  <g transform="translate(340, 20)">
+  <line x1="0" y1="65" x2="30" y2="65" stroke="currentColor" stroke-width="1.5" marker-end="url(#ndt-arrow)" />
+  </g>
+  <!-- Gaussian modeling (Right) -->
+  <g transform="translate(380, 20)">
+  <text x="80" y="10" text-anchor="middle" font-size="12" fill="currentColor">3. 局部高斯拟合 (PDF)</text>
+  <rect x="0" y="20" width="160" height="90" fill="none" stroke="currentColor" stroke-width="1.5" rx="4" />
+  <line x1="53.3" y1="20" x2="53.3" y2="110" stroke="currentColor" stroke-dasharray="2 2" stroke-width="1" />
+  <line x1="106.6" y1="20" x2="106.6" y2="110" stroke="currentColor" stroke-dasharray="2 2" stroke-width="1" />
+  <line x1="0" y1="50" x2="160" y2="50" stroke="currentColor" stroke-dasharray="2 2" stroke-width="1" />
+  <line x1="0" y1="80" x2="160" y2="80" stroke="currentColor" stroke-dasharray="2 2" stroke-width="1" />
+  <ellipse cx="26.6" cy="35" rx="20" ry="12" fill="rgba(82, 196, 26, 0.15)" stroke="#52c41a" stroke-width="1.5" />
+  <text x="26.6" y="38" text-anchor="middle" font-size="9" fill="#52c41a">N₁</text>
+  <ellipse cx="80" cy="65" rx="18" ry="10" fill="rgba(82, 196, 26, 0.15)" stroke="#52c41a" stroke-width="1.5" />
+  <text x="80" y="68" text-anchor="middle" font-size="9" fill="#52c41a">N₂</text>
+  <ellipse cx="133.3" cy="95" rx="22" ry="12" fill="rgba(82, 196, 26, 0.15)" stroke="#52c41a" stroke-width="1.5" />
+  <text x="133.3" y="98" text-anchor="middle" font-size="9" fill="#52c41a">N₃</text>
+  </g>
+  <defs>
+  <marker id="ndt-arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+  <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="currentColor" />
+  </marker>
+  </defs>
+</svg>
 
-    ·  ·  ·                 ┌──┬──┬──┬──┐               ┌──┬──┬──┬──┐
-   ·    ·   ·               │··│  │· │··│               │N₁│  │N₃│N₄│
-     ·   ·     ──►          ├──┼──┼──┼──┤     ──►       ├──┼──┼──┼──┤
-  ·    ·   ·                │· │··│··│· │               │N₅│N₆│N₇│N₈│
-    · ·   ·                 ├──┼──┼──┼──┤               ├──┼──┼──┼──┤
-      ·  ·                  │  │· │· │  │               │  │N₉│N₁₀│ │
-                            └──┴──┴──┴──┘               └──┴──┴──┴──┘
+$N_k = (\mu_k, \Sigma_k)$: 该体素内所有点的均值和协方差矩阵。
 
-  N_k = (μ_k, Σ_k): 该体素内所有点的均值和协方差矩阵
-```
 
 ### 1.2 为什么要这样做？
 
@@ -263,26 +311,50 @@ def open3d_ndt_registration(source, target, voxel_size=0.5, init=np.eye(4)):
 
 ## 五、NDT vs ICP 深度对比
 
-```
-  ICP vs NDT 的可视化对比
 
-  场景: 走廊中的激光扫描 (长直结构, 点云重复纹理)
+<svg viewBox="0 0 600 220" width="100%" style="background-color: transparent; font-family: sans-serif; margin: 20px 0; overflow: visible;">
+  <!-- ICP Corridor (Left) -->
+  <g transform="translate(50, 20)">
+  <text x="100" y="0" text-anchor="middle" font-size="14" fill="currentColor">ICP (最近邻搜索)</text>
+  <line x1="10" y1="40" x2="190" y2="40" stroke="currentColor" stroke-width="2" />
+  <line x1="10" y1="120" x2="190" y2="120" stroke="currentColor" stroke-width="2" />
+  <circle cx="40" cy="50" r="3" fill="#1677ff" />
+  <circle cx="40" cy="70" r="3" fill="#1677ff" />
+  <circle cx="40" cy="90" r="3" fill="#1677ff" />
+  <circle cx="40" cy="110" r="3" fill="#1677ff" />
+  <circle cx="160" cy="55" r="3" fill="#fa8c16" />
+  <circle cx="160" cy="75" r="3" fill="#fa8c16" />
+  <circle cx="160" cy="95" r="3" fill="#fa8c16" />
+  <circle cx="160" cy="115" r="3" fill="#fa8c16" />
+  <line x1="40" y1="50" x2="160" y2="55" stroke="#f5222d" stroke-width="1.5" stroke-dasharray="2 2" />
+  <line x1="40" y1="70" x2="160" y2="75" stroke="#f5222d" stroke-width="1.5" stroke-dasharray="2 2" />
+  <line x1="40" y1="90" x2="160" y2="95" stroke="#f5222d" stroke-width="1.5" stroke-dasharray="2 2" />
+  <line x1="40" y1="110" x2="160" y2="115" stroke="#f5222d" stroke-width="1.5" stroke-dasharray="2 2" />
+  <text x="100" y="160" text-anchor="middle" font-size="12" fill="#f5222d">"最近点"沿走廊方向关联模糊<br/>容易陷入错误的纵向平移量</text>
+  </g>
+  <!-- NDT Corridor (Right) -->
+  <g transform="translate(350, 20)">
+  <text x="100" y="0" text-anchor="middle" font-size="14" fill="currentColor">NDT (概率高斯似然)</text>
+  <line x1="10" y1="40" x2="190" y2="40" stroke="currentColor" stroke-width="2" />
+  <line x1="10" y1="120" x2="190" y2="120" stroke="currentColor" stroke-width="2" />
+  <ellipse cx="160" cy="80" rx="30" ry="40" fill="rgba(82, 196, 26, 0.15)" stroke="#52c41a" stroke-dasharray="3 1" stroke-width="1.5" />
+  <circle cx="40" cy="50" r="3" fill="#1677ff" />
+  <circle cx="40" cy="70" r="3" fill="#1677ff" />
+  <circle cx="40" cy="90" r="3" fill="#1677ff" />
+  <circle cx="40" cy="110" r="3" fill="#1677ff" />
+  <line x1="40" y1="50" x2="130" y2="70" stroke="#52c41a" stroke-width="1.5" marker-end="url(#arrow-green-corridor)" />
+  <line x1="40" y1="70" x2="130" y2="75" stroke="#52c41a" stroke-width="1.5" marker-end="url(#arrow-green-corridor)" />
+  <line x1="40" y1="90" x2="130" y2="85" stroke="#52c41a" stroke-width="1.5" marker-end="url(#arrow-green-corridor)" />
+  <line x1="40" y1="110" x2="130" y2="90" stroke="#52c41a" stroke-width="1.5" marker-end="url(#arrow-green-corridor)" />
+  <text x="100" y="160" text-anchor="middle" font-size="12" fill="#52c41a">PDF 梯度指向高斯分布中心<br/>提供明确的平移对齐梯度</text>
+  </g>
+  <defs>
+  <marker id="arrow-green-corridor" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+  <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#52c41a" />
+  </marker>
+  </defs>
+</svg>
 
-  ICP                          NDT
-
-  源点 ●                        源点 ●
-  目标 ○                        目标 ○
-
-  ●          ○                 ●    →→→→→→  ○
-  ●        ○                   ●    →→→→→→  ○
-  ●      ○                     ●    →→→→→→  ○
-  ●    ○                       ●    →→→→→→  ○
-  ●  ○                         ●    →→→→→→  ○
-
-  "最近点"沿走廊方向的             PDF 梯度指向体素中心
-  对应关系是模糊的                 提供了清晰的优化梯度
-  容易陷入错误的平移量              沿走廊方向的平移不影响得分
-```
 
 | 维度 | ICP | NDT |
 |------|-----|-----|

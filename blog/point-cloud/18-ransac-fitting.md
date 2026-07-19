@@ -115,32 +115,26 @@ def adaptive_ransac_max_iters(current_best_inliers, total_points, sample_size,
 
 ## 三、RANSAC 算法流程
 
-```
-  ┌─────────────────────────────────────────────────────┐
-  │                RANSAC 算法                            │
-  ├─────────────────────────────────────────────────────┤
-  │                                                      │
-  │  输入: 数据 X, 模型类型, 距离阈值 τ, 置信度 P          │
-  │                                                      │
-  │  best_model ← None                                    │
-  │  best_inliers ← []                                    │
-  │  max_iters ← ∞                                       │
-  │  iter ← 0                                             │
-  │                                                      │
-  │  while iter < max_iters:                             │
-  │    1. 随机采样 s 个点                                  │
-  │    2. 拟合模型 hypothesis ← fit(sample)                │
-  │    3. 验证：统计误差 < τ 的内点数 n_inliers            │
-  │    4. 如果 n_inliers > best_inliers:                  │
-  │          best_model ← hypothesis                      │
-  │          best_inliers ← n_inliers                      │
-  │          更新 max_iters (自适应)                       │
-  │    5. iter ← iter + 1                                 │
-  │                                                      │
-  │  可选: 用所有内点重新拟合模型 (LS 精化)                 │
-  │                                                      │
-  │  输出: best_model, best_inlier_indices               │
-  └─────────────────────────────────────────────────────┘
+```mermaid
+flowchart TD
+    Start["输入: 数据 X, 模型类型, 距离阈值 τ, 置信度 P"] --> Init["初始化:<br/>best_model = None<br/>best_inliers = []<br/>max_iters = ∞<br/>iter = 0"]
+    Init --> Loop["while iter < max_iters:"]
+    
+    Loop --> Sample["1. 随机采样 s 个点"]
+    Sample --> Fit["2. 拟合模型: hypothesis = fit(sample)"]
+    Fit --> Verify["3. 验证: 统计误差 < τ 的内点数 n_inliers"]
+    
+    Verify --> CheckBetter{"n_inliers > |best_inliers| ?"}
+    CheckBetter -->|是| Update["4. 更新最佳模型:<br/>best_model = hypothesis<br/>best_inliers = 当前所有内点<br/>根据当前内点率自适应更新 max_iters"]
+    CheckBetter -->|否| Inc["5. iter = iter + 1"]
+    
+    Update --> Inc
+    Inc --> Loop
+    
+    Loop -->|循环结束| Refine{"是否用所有内点重新拟合 (LS 精化) ?"}
+    Refine -->|是| LSRefine["用 best_inliers 重新计算最佳模型"]
+    Refine -->|否| Output["输出: best_model, best_inliers"]
+    LSRefine --> Output
 ```
 
 ---

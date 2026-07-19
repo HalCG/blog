@@ -151,17 +151,13 @@ Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 
 在后续章节中，我们将频繁使用 Open3D 的以下核心数据结构：
 
-```
-  ┌─────────────────────────────────────────────────────────┐
-  │                  Open3D 核心数据类型                      │
-  ├──────────────────────┬──────────────────────────────────┤
-  │ PointCloud           │ 点云 (points, normals, colors)   │
-  │ TriangleMesh         │ 三角网格 (vertices, triangles)   │
-  │ VoxelGrid            │ 体素网格                          │
-  │ KDTreeFlann          │ FLANN 加速的 KD-Tree 搜索        │
-  │ LineSet              │ 线段集合 (用于可视化法线等)        │
-  └──────────────────────┴──────────────────────────────────┘
-```
+| Open3D 数据类型 | 描述 |
+| :--- | :--- |
+| **PointCloud** | 点云 (points, normals, colors) |
+| **TriangleMesh** | 三角网格 (vertices, triangles) |
+| **VoxelGrid** | 体素网格 |
+| **KDTreeFlann** | FLANN 加速 of KD-Tree 搜索 |
+| **LineSet** | 线段集合 (用于可视化法线等) |
 
 ```python
 import open3d as o3d

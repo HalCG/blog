@@ -34,24 +34,53 @@ description: 系统介绍聚类算法的基本概念、相似度/距离度量的
 
 点云聚类与一般数据聚类的关键区别在于：**点的空间邻近性往往已经暗示了物体的归属关系**。
 
-```
-  自动驾驶场景中的聚类期望结果
-
-  原始 LiDAR 点云 (俯视图)           聚类结果
-
-  ┌─────────────────────────┐      ┌─────────────────────────┐
-  │  ·  · · ·   (建筑立面)   │      │  ▓▓  ▓▓ ▓▓   [背景]     │
-  │                          │      │                          │
-  │    ████                  │      │    [车辆 A]              │
-  │    ████  (前方车辆)      │      │    ┌────┐                │
-  │    ████                  │      │    └────┘                │
-  │                          │      │                          │
-  │  ██                      │      │    [车辆 B]              │
-  │  ██    (侧方车辆)        │      │    ┌──┐                  │
-  │                          │      │    └──┘                  │
-  │       ·  (行人)          │      │         ●  [行人]        │
-  └─────────────────────────┘      └─────────────────────────┘
-```
+<svg viewBox="0 0 600 200" width="100%" style="background-color: transparent; font-family: sans-serif; margin: 20px 0; overflow: visible;">
+  <!-- Left Side: Original LiDAR Point Cloud -->
+  <g transform="translate(40, 20)">
+  <rect x="0" y="20" width="220" height="130" fill="rgba(100, 100, 100, 0.05)" stroke="var(--vp-c-divider)" stroke-width="1.5" rx="6" />
+  <text x="110" y="10" text-anchor="middle" font-size="13" fill="currentColor">原始 LiDAR 点云 (俯视图)</text>
+  <!-- Building facade (top) -->
+  <path d="M 30,40 Q 110,35 190,40" fill="none" stroke="var(--vp-c-text-3)" stroke-width="1.5" stroke-dasharray="2 2" />
+  <text x="110" y="55" text-anchor="middle" font-size="10" fill="var(--vp-c-text-3)">建筑立面 (点云线段)</text>
+  <!-- Car A (center) -->
+  <rect x="80" y="70" width="60" height="22" rx="3" fill="var(--vp-c-text-3)" opacity="0.3" />
+  <text x="110" y="84" text-anchor="middle" font-size="10" fill="currentColor">前方车辆 🚗</text>
+  <!-- Car B (left bottom) -->
+  <rect x="30" y="105" width="40" height="20" rx="3" fill="var(--vp-c-text-3)" opacity="0.3" />
+  <text x="50" y="118" text-anchor="middle" font-size="9" fill="currentColor">侧方车辆</text>
+  <!-- Pedestrian (right bottom) -->
+  <circle cx="160" cy="115" r="4.5" fill="var(--vp-c-text-3)" />
+  <text x="160" y="130" text-anchor="middle" font-size="9" fill="var(--vp-c-text-3)">行人</text>
+  </g>
+  <!-- Arrow -->
+  <g transform="translate(285, 20)">
+  <line x1="0" y1="85" x2="30" y2="85" stroke="currentColor" stroke-width="2" marker-end="url(#clustering-arrow)" />
+  </g>
+  <!-- Right Side: Clustering Result -->
+  <g transform="translate(340, 20)">
+  <rect x="0" y="20" width="220" height="130" fill="rgba(100, 100, 100, 0.05)" stroke="var(--vp-c-divider)" stroke-width="1.5" rx="6" />
+  <text x="110" y="10" text-anchor="middle" font-size="13" fill="currentColor">聚类结果</text>
+  <!-- Building facade clustered (purple) -->
+  <path d="M 30,40 Q 110,35 190,40" fill="none" stroke="#722ed1" stroke-width="3" />
+  <rect x="90" y="44" width="40" height="12" rx="2" fill="rgba(114, 46, 209, 0.15)" />
+  <text x="110" y="53" text-anchor="middle" font-size="8" fill="#722ed1">背景 (建筑)</text>
+  <!-- Car A clustered (blue) -->
+  <rect x="80" y="70" width="60" height="22" rx="3" fill="rgba(22, 119, 255, 0.15)" stroke="#1677ff" stroke-width="2" />
+  <text x="110" y="84" text-anchor="middle" font-size="10" fill="#1677ff">车辆 A</text>
+  <!-- Car B clustered (orange) -->
+  <rect x="30" y="105" width="40" height="20" rx="3" fill="rgba(250, 140, 22, 0.15)" stroke="#fa8c16" stroke-width="2" />
+  <text x="50" y="118" text-anchor="middle" font-size="9" fill="#fa8c16">车辆 B</text>
+  <!-- Pedestrian clustered (green) -->
+  <circle cx="160" cy="115" r="5" fill="#52c41a" />
+  <text x="160" y="130" text-anchor="middle" font-size="9" fill="#52c41a">行人</text>
+  </g>
+  <!-- Definition of arrow -->
+  <defs>
+  <marker id="clustering-arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+  <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="currentColor" />
+  </marker>
+  </defs>
+</svg>
 
 ---
 
@@ -90,20 +119,9 @@ description: 系统介绍聚类算法的基本概念、相似度/距离度量的
 
 ### 3.1 五大范式概览
 
-```
-  聚类算法家族树
-
-  ┌──────────────────────────────────────────────────────────────┐
-  │                      聚类算法                                 │
-  ├──────────┬──────────┬──────────────┬──────────────┬──────────┤
-  │  划分式  │  层次式   │   密度式     │   模型式     │  谱聚类  │
-  │Partition │Hierarchy │  Density     │   Model      │Spectral  │
-  ├──────────┼──────────┼──────────────┼──────────────┼──────────┤
-  │ K-Means  │Agglomer- │  DBSCAN      │  GMM (EM)    │Spectral  │
-  │ K-Medoids│  ative   │  MeanShift   │ 混合模型     │Cluster-  │
-  │          │Divisive  │  OPTICS      │              │  ing     │
-  └──────────┴──────────┴──────────────┴──────────────┴──────────┘
-```
+| 范式 | 划分式 (Partitioning) | 层次式 (Hierarchical) | 密度式 (Density-Based) | 模型式 (Model-Based) | 谱聚类 (Spectral) |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **代表算法** | K-Means<br/>K-Medoids | Agglomerative<br/>Divisive | DBSCAN<br/>MeanShift<br/>OPTICS | GMM (EM)<br/>混合模型 | Spectral Clustering |
 
 ### 3.2 各范式的核心思想
 
@@ -196,17 +214,17 @@ def preprocess_for_clustering(pcd, voxel_size=0.05):
 
 ### 5.2 聚类算法选择决策树
 
-```
-  选择聚类方法的决策流程:
-
-  知道簇的数量 K?
-    ├── 是 → 簇是球形?
-    │       ├── 是 → K-Means
-    │       └── 否 → GMM (软、椭圆簇) 或 谱聚类 (非凸)
-    └── 否 → 簇密度均匀?
-            ├── 是 → DBSCAN
-            └── 否 → MeanShift (自适应带宽)
-                    或 OPTICS (密度变化)
+```mermaid
+flowchart TD
+    A{"知道簇的数量 K ?"}
+    
+    A -->|是| B{"簇是球形 ?"}
+    B -->|是| C["K-Means"]
+    B -->|否| D["GMM (软、椭圆簇)<br/>或 谱聚类 (非凸)"]
+    
+    A -->|否| E{"簇密度均匀 ?"}
+    E -->|是| F["DBSCAN"]
+    E -->|否| G["MeanShift (自适应带宽)<br/>或 OPTICS (密度变化)"]
 ```
 
 ---

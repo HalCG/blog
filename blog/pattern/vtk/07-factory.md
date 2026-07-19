@@ -1,4 +1,4 @@
-﻿# VTK 设计模式：工厂模式
+# VTK 设计模式：工厂模式
 
 > 系列：[Qt / VTK 设计模式](../README.md) · VTK 07/10  
 > 参考：[vtkObjectFactory](https://vtk.org/doc/nightly/html/classvtkObjectFactory.html)、[vtkObject.h New() macro](https://vtk.org/doc/nightly/html/vtkObject_8h.html)
@@ -63,11 +63,13 @@ vtkSmartPointer<vtkActor> actor = vtkSmartPointer<vtkActor>::New();
 
 创建链（简化）：
 
-```
-vtkFoo::New()
-  → vtkObjectFactory::CreateInstance("vtkFoo")
-  → 遍历已注册 Factory
-  → 若 override 存在则返回子类，否则 vtkFoo 默认构造
+```mermaid
+flowchart TD
+    A["vtkFoo::New()"] --> B["vtkObjectFactory::CreateInstance('vtkFoo')"]
+    B --> C["遍历已注册 Factory"]
+    C --> D{"Override 存在？"}
+    D -->|是| E["返回子类实例"]
+    D -->|否| F["vtkFoo 默认构造"]
 ```
 
 引用计数从 `New()` 返回时通常为 1，由调用方或智能指针管理。

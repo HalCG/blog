@@ -15,21 +15,39 @@ SHOT（Signature of Histograms of OrienTations）是 Tombari 等人于 2010 年�
 
 SHOT 在一个以关键点为中心的球形支撑区域内，将空间划分为若干个子区域，并在每个子区域内统计法向量方向的直方图：
 
-```
-  SHOT 的球面分区结构
 
-  径向分区 (2 层)      方位角分区 (8 份)      仰角分区 (2 份)
+<svg viewBox="0 0 600 200" width="100%" style="background-color: transparent; font-family: sans-serif; margin: 20px 0; overflow: visible;">
+  <!-- Radial Division (Left) -->
+  <g transform="translate(100, 100)">
+  <circle cx="0" cy="0" r="70" fill="rgba(22, 119, 255, 0.08)" stroke="#1677ff" stroke-width="2" />
+  <circle cx="0" cy="0" r="35" fill="rgba(22, 119, 255, 0.15)" stroke="#1677ff" stroke-dasharray="3 3" stroke-width="2" />
+  <circle cx="0" cy="0" r="3" fill="#1677ff" />
+  <text x="0" y="-85" text-anchor="middle" font-size="13" fill="currentColor">1. 径向分区 (2层)</text>
+  <text x="0" y="5" font-size="11" fill="#1677ff" text-anchor="middle">Inner</text>
+  <text x="0" y="50" font-size="11" fill="#1677ff" text-anchor="middle">Outer</text>
+  </g>
+  <!-- Azimuth Division (Middle) -->
+  <g transform="translate(300, 100)">
+  <circle cx="0" cy="0" r="70" fill="rgba(82, 196, 26, 0.08)" stroke="#52c41a" stroke-width="2" />
+  <line x1="0" y1="-70" x2="0" y2="70" stroke="#52c41a" stroke-width="1.5" stroke-dasharray="2 2" />
+  <line x1="-70" y1="0" x2="70" y2="0" stroke="#52c41a" stroke-width="1.5" stroke-dasharray="2 2" />
+  <line x1="-49.5" y1="-49.5" x2="49.5" y2="49.5" stroke="#52c41a" stroke-width="1.5" stroke-dasharray="2 2" />
+  <line x1="-49.5" y1="49.5" x2="49.5" y2="-49.5" stroke="#52c41a" stroke-width="1.5" stroke-dasharray="2 2" />
+  <text x="0" y="-85" text-anchor="middle" font-size="13" fill="currentColor">2. 方位角分区 (8等分)</text>
+  <text x="30" y="-30" font-size="11" fill="#52c41a">45°</text>
+  </g>
+  <!-- Elevation Division (Right) -->
+  <g transform="translate(500, 100)">
+  <circle cx="0" cy="0" r="70" fill="rgba(114, 46, 209, 0.08)" stroke="#722ed1" stroke-width="2" />
+  <ellipse cx="0" cy="0" rx="70" ry="20" fill="none" stroke="#722ed1" stroke-width="1.5" stroke-dasharray="4 2" />
+  <text x="0" y="-85" text-anchor="middle" font-size="13" fill="currentColor">3. 仰角分区 (2等分)</text>
+  <text x="0" y="-30" font-size="11" fill="#722ed1" text-anchor="middle">北半球 (Upper)</text>
+  <text x="0" y="40" font-size="11" fill="#722ed1" text-anchor="middle">南半球 (Lower)</text>
+  </g>
+</svg>
 
-  ╭───────╮            ┌──┬──┬──┬──┐          ╭───────────╮
-  │ inner │            │  │  │  │  │          │ upper     │
-  │  ╭─╮  │            ├──┼──┼──┼──┤          │  hemisphere│
-  │  ╰─╯  │            │  │  │  │  │          ├───────────┤
-  │ outer │            │  │  │  │  │          │ lower     │
-  ╰───────╯            └──┴──┴──┴──┘          │  hemisphere│
-                                               ╰───────────╯
+总计: 2 (径向) × 8 (方位角) × 2 (仰角) = 32 个空间分区。
 
-  总计: 2 (径向) × 8 (方位角) × 2 (仰角) = 32 个空间分区
-```
 
 每个空间分区内统计一个 11 bin 的法向量方向直方图（用法向量与关键点法向量的夹角量化）。
 
@@ -37,21 +55,44 @@ SHOT 在一个以关键点为中心的球形支撑区域内，将空间划分为
 
 ### 1.2 与 FPFH 的本质区别
 
-```
-  FPFH (全局统计)                    SHOT (空间分区统计)
 
-  ┌─────────────────┐              ┌──┬──┬──┬──┐
-  │  ●               │              │▓▓│  │  │▓▓│
-  │    ∘ ∘          │              ├──┼──┼──┼──┤
-  │  ∘   ∘ ∘   ∘   │              │  │▓▓│▓▓│  │
-  │    ∘     ∘      │              ├──┼──┼──┼──┤
-  │  ∘   ●   ∘      │              │  │  │  │  │
-  │    ∘   ∘        │              ├──┼──┼──┼──┤
-  └─────────────────┘              │▓▓│  │▓▓│  │
-                                   └──┴──┴──┴──┘
-  全邻域统计一个直方图              各分区独立统计 → 保留空间结构
-  丢失空间分布信息                 空间-角度都编码
-```
+<svg viewBox="0 0 600 200" width="100%" style="background-color: transparent; font-family: sans-serif; margin: 20px 0; overflow: visible;">
+  <!-- FPFH -->
+  <g transform="translate(150, 100)">
+  <circle cx="0" cy="0" r="65" fill="rgba(100, 100, 100, 0.08)" stroke="currentColor" stroke-width="2" />
+  <circle cx="0" cy="0" r="4" fill="#1677ff" />
+  <circle cx="-35" cy="-25" r="3.5" fill="#1677ff" />
+  <circle cx="35" cy="-35" r="3.5" fill="#1677ff" />
+  <circle cx="-40" cy="25" r="3.5" fill="#1677ff" />
+  <circle cx="25" cy="35" r="3.5" fill="#1677ff" />
+  <rect x="-40" y="-95" width="80" height="20" rx="3" fill="#1677ff" opacity="0.15" stroke="#1677ff" />
+  <text x="0" y="-81" font-size="11" fill="#1677ff" text-anchor="middle">单个全局直方图</text>
+  <line x1="0" y1="-75" x2="0" y2="-65" stroke="#1677ff" stroke-width="1.5" />
+  <text x="0" y="90" text-anchor="middle" font-size="13" fill="currentColor">FPFH (全局统计)</text>
+  <text x="0" y="110" text-anchor="middle" font-size="11" fill="var(--vp-c-text-2)">全邻域统计一个直方图，丢失空间分布</text>
+  </g>
+  <!-- SHOT -->
+  <g transform="translate(450, 100)">
+  <circle cx="0" cy="0" r="65" fill="rgba(100, 100, 100, 0.08)" stroke="currentColor" stroke-width="2" />
+  <circle cx="0" cy="0" r="32.5" fill="none" stroke="currentColor" stroke-width="1" stroke-dasharray="2 2" opacity="0.5" />
+  <line x1="-65" y1="0" x2="65" y2="0" stroke="currentColor" stroke-width="1" stroke-dasharray="2 2" opacity="0.5" />
+  <line x1="0" y1="-65" x2="0" y2="65" stroke="currentColor" stroke-width="1" stroke-dasharray="2 2" opacity="0.5" />
+  <circle cx="0" cy="0" r="4" fill="#52c41a" />
+  <g opacity="0.8">
+  <rect x="-55" y="-55" width="22" height="15" rx="2" fill="#52c41a" />
+  <circle cx="-25" cy="-20" r="3.5" fill="#52c41a" />
+  <rect x="33" y="-55" width="22" height="15" rx="2" fill="#52c41a" />
+  <circle cx="20" cy="-25" r="3.5" fill="#52c41a" />
+  <rect x="-55" y="40" width="22" height="15" rx="2" fill="#52c41a" />
+  <circle cx="-25" cy="20" r="3.5" fill="#52c41a" />
+  <rect x="33" y="40" width="22" height="15" rx="2" fill="#52c41a" />
+  <circle cx="20" cy="25" r="3.5" fill="#52c41a" />
+  </g>
+  <text x="0" y="90" text-anchor="middle" font-size="13" fill="currentColor">SHOT (空间分区统计)</text>
+  <text x="0" y="110" text-anchor="middle" font-size="11" fill="var(--vp-c-text-2)">各子空间独立统计直方图，保留局部结构</text>
+  </g>
+</svg>
+
 
 > FPFH 告诉你"邻域内法向量整体偏转多少度"，但丢失了"在哪个方向偏转"的空间信息。SHOT 通过空间分区保留了这些信息，区分力显著更高。
 
@@ -80,19 +121,38 @@ $$S_k^- = \{p_j : (p_j - p_q) \cdot v_k < 0\}$$
 
 如果 $|S_k^+| < |S_k^-|$，则将 $v_k$ 反转为 $-v_k$。这确保了 LRF 三轴的符号一致性。
 
-```
-  符号消歧示意
+<svg viewBox="0 0 500 160" width="100%" style="background-color: transparent; font-family: sans-serif; margin: 20px 0; overflow: visible;">
+  <!-- Axis line -->
+  <line x1="50" y1="80" x2="450" y2="80" stroke="currentColor" stroke-width="1.5" stroke-dasharray="4 4" />
+  <!-- Query point -->
+  <polygon points="250,70 255,80 265,82 257,89 260,99 250,93 240,99 243,89 235,82 245,80" fill="#f5222d" />
+  <text x="250" y="60" text-anchor="middle" font-size="11" fill="#f5222d">关键点 ★</text>
+  <!-- Left Side: -v direction (Fewer points) -->
+  <g transform="translate(100, 80)">
+  <circle cx="-20" cy="-20" r="4" fill="var(--vp-c-text-3)" />
+  <circle cx="-10" cy="15" r="4" fill="var(--vp-c-text-3)" />
+  <circle cx="30" cy="-25" r="4" fill="var(--vp-c-text-3)" />
+  <text x="-40" y="5" font-size="13" fill="var(--vp-c-text-2)">-v 方向 (点较稀疏)</text>
+  </g>
+  <!-- Right Side: +v direction (More points) -->
+  <g transform="translate(350, 80)">
+  <circle cx="-10" cy="-20" r="4" fill="#1677ff" />
+  <circle cx="-20" cy="10" r="4" fill="#1677ff" />
+  <circle cx="10" cy="25" r="4" fill="#1677ff" />
+  <circle cx="20" cy="-15" r="4" fill="#1677ff" />
+  <circle cx="30" cy="10" r="4" fill="#1677ff" />
+  <circle cx="45" cy="-25" r="4" fill="#1677ff" />
+  <line x1="-30" y1="0" x2="60" y2="0" stroke="#1677ff" stroke-width="2.5" marker-end="url(#arrow-blue-lrf)" />
+  <text x="75" y="4" font-size="13" fill="#1677ff">+v 方向 (点较密集)</text>
+  </g>
+  <text x="250" y="140" text-anchor="middle" font-size="12" fill="var(--vp-c-text-1)">统计沿特征向量两个方向的点云分布偏向 -> 统一选择点多的一侧作为正向，消除符号模糊</text>
+  <defs>
+  <marker id="arrow-blue-lrf" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+  <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#1677ff" />
+  </marker>
+  </defs>
+</svg>
 
-  特征向量方向 v            -v 方向
-  ●  ●  ●                              ●
-  ●  ●  ●                           ●  ●
-  ●  ★  ●                        ●  ★  ●
-  ●  ●  ●                           ●  ●
-  ●  ●  ●                           ●  ●
-          ●                              ●  ●  ●
-
-  v 方向点多 → 保留 v
-```
 
 ### 2.3 LRF 实现的代码
 

@@ -110,12 +110,11 @@ void main() {
 
 在 OpenGL 中，Shader 中的 Uniform 块与 C++ 中的 UBO 并不是直接相连的，而是通过一个中介——**绑定点（Binding Points）**来实现连接：
 
-```
-[ Shader A (Uniform Block) ] ──(Block Binding 0)──┐
-                                                  ▼
-                                          [ 绑定点 0 (Slot 0) ] ◄──(glBindBufferBase)── [ C++ 中的 UBO (Matrices) ]
-                                                  ▲
-[ Shader B (Uniform Block) ] ──(Block Binding 0)──┘
+```mermaid
+flowchart LR
+    ShaderA["Shader A (Uniform Block)"] -->|Block Binding 0| BindingPoint["绑定点 0 (Slot 0)"]
+    ShaderB["Shader B (Uniform Block)"] -->|Block Binding 0| BindingPoint
+    UBO["C++ 中的 UBO (Matrices)"] -->|glBindBufferBase| BindingPoint
 ```
 
 #### C++ 绑定连接步骤：
@@ -130,7 +129,7 @@ glUniformBlockBinding(shader.ID, blockIndex, 0);
 glBindBufferBase(GL_UNIFORM_BUFFER, 0, uboMatrices);
 ```
 
-#### 💡 现代 OpenGL 捷径（GLSL 4.2+）：
+#### 现代 OpenGL 捷径（GLSL 4.2+）：
 在 GLSL 4.2 及以上版本中，我们可以在 Shader 中直接指定绑定点，从而**完全省略** C++ 中的 `glGetUniformBlockIndex` 和 `glUniformBlockBinding`：
 ```glsl
 // 直接在 layout 中指定 binding = 0

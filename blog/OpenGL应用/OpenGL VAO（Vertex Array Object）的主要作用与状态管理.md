@@ -29,27 +29,16 @@ glDrawArrays(GL_TRIANGLES, 0, 3);
 
 VAO 是一个在 GPU 显存中的对象，它内部维护了一个状态树。为了彻底理清其机制，我们需要分清哪些状态被记录在 VAO 中，哪些状态由全局上下文持有。
 
-```
-              ┌──────────────────────────────────────────┐
-              │          VAO (Vertex Array Object)       │
-              └───────────────────┬──────────────────────┘
-                                  │
-         ┌────────────────────────┼────────────────────────┐
-         ▼                        ▼                        ▼
- ┌──────────────┐         ┌──────────────┐         ┌──────────────┐
- │ 属性数组开关 │         │ 属性装配格式 │         │ 关联的 VBO   │
- │ (Enable Flags)│        │ (Format/Ptr) │         │ (Buffer Obj) │
- └──────┬───────┘         └──────┬───────┘         └──────┬───────┘
-        │                        │                        │
-  Slot 0: Enable           Slot 0: Size, Stride...  Slot 0: VBO_A
-  Slot 1: Disable          Slot 1: Size, Stride...  Slot 1: VBO_B
-  Slot 2: Enable           Slot 2: Size, Stride...  Slot 2: VBO_A
-                                  │
-                                  ▼
-                     ┌──────────────────────────┐
-                     │   GL_ELEMENT_ARRAY_BUFFER│
-                     │   (绑定的 EBO / IBO 对象)│
-                     └──────────────────────────┘
+```mermaid
+flowchart TD
+    VAO["VAO (Vertex Array Object)"]
+    VAO --> E["属性数组开关<br/>(Enable Flags)"]
+    VAO --> F["属性装配格式<br/>(Format / Pointer)"]
+    VAO --> B["关联的 VBO<br/>(Buffer Object)"]
+    VAO --> EBO["GL_ELEMENT_ARRAY_BUFFER<br/>（绑定的 EBO / IBO 对象）"]
+    E --> E1["Slot 0: Enable<br/>Slot 1: Disable<br/>Slot 2: Enable"]
+    F --> F1["Slot 0/1/2:<br/>Size、Stride 等"]
+    B --> B1["Slot 0: VBO_A<br/>Slot 1: VBO_B<br/>Slot 2: VBO_A"]
 ```
 
 具体而言，VAO 内部记录的**状态清单**如下：

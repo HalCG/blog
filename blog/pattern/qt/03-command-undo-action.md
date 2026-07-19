@@ -25,10 +25,14 @@ void onDelete() { model->remove(selected); /* 没有 undo */ }
 
 ## GoF 命令结构
 
-```
-Invoker ──▶ Command::execute()
-                ├── ConcreteCommandA
-                └── ConcreteCommandB
+```mermaid
+classDiagram
+    class Command {
+        +execute()
+    }
+    Invoker --> Command : 调用 execute()
+    Command <|-- ConcreteCommandA
+    Command <|-- ConcreteCommandB
 ```
 
 | 角色 | Qt 对应 |

@@ -32,13 +32,11 @@ glLinkProgram(program);
 
 在整个 OpenGL 渲染管线中，几何着色器的数据流向如下：
 
-```
-┌─────────────┐    ┌─────────────┐    ┌─────────────┐    ┌─────────────┐
-│   Vertex    │    │  Geometry   │    │  Fragment   │    │ Rasterizer  │
-│   Shader    │ ─> │   Shader    │ ─> │   Shader    │ ─> │   & Test    │
-│  (逐顶点)   │    │  (逐图元)   │    │  (逐片段)   │    │ (固定管线)  │
-└─────────────┘    └─────────────┘    └─────────────┘    └─────────────┘
-   顶点变换           图元变换/生成         逐像素着色           输出合并
+```mermaid
+flowchart LR
+    VS["Vertex Shader<br/>(逐顶点)<br/>——<br/>顶点变换"] --> GS["Geometry Shader<br/>(逐图元)<br/>——<br/>图元变换/生成"]
+    GS --> FS["Fragment Shader<br/>(逐片段)<br/>——<br/>逐像素着色"]
+    FS --> RT["Rasterizer & Test<br/>(固定管线)<br/>——<br/>输出合并"]
 ```
 
 由于几何着色器能够在 GPU 端**即时、动态地生成新的几何形体**，因此在需要动态细分、法线可视化、爆炸效果或粒子广告牌时，它提供了极大的灵活性，避免了频繁在 CPU 端修改顶点缓冲区（VBO）的昂贵开销。

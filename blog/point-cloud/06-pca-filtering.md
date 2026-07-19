@@ -128,7 +128,7 @@ def statistical_outlier_removal(pcd, nb_neighbors=20, std_ratio=2.0):
 
 # Open3D 内置等价调用:
 # pcd_filtered, ind = pcd.remove_statistical_outlier(
-#     nb_neighbors=20, std_ratio=2.0
+# nb_neighbors=20, std_ratio=2.0
 # )
 ```
 
@@ -187,7 +187,7 @@ def radius_outlier_removal(pcd, radius=0.1, min_neighbors=5):
 
 # Open3D 内置等价调用:
 # pcd_filtered, ind = pcd.remove_radius_outlier(
-#     nb_points=5, radius=0.1
+# nb_points=5, radius=0.1
 # )
 ```
 

@@ -5,41 +5,25 @@ description: 转载来源：[vtkPolyData 详解](https://blog.csdn.net/weixin_43
 
 # vtkPolyData 详解
 
-
 转载来源：[vtkPolyData 详解](https://blog.csdn.net/weixin_43160093/article/details/151396818)
-
-
 
 #### 1 概述
 
-
-
 vtkPolyData 是 VTK 中用于表示基于顶点的几何图形的基础数据结构。其继承关系如下：
  https://blog.csdn.net/weixin_43160093/article/details/151396818
-
-
 
 ```
 vtkObject → vtkDataSet → vtkPointSet → vtkPolyData
 
 ```
 
-
 这种继承体系表明 vtkPolyData 具备了处理几何与拓扑数据的完整能力。从源码角度分析，其类定义位于 `Common/DataModel/vtkPolyData.h` 中。
-
-
 
 #### 2 核心数据结构解析
 
-
-
 ##### 2.1 几何数据：点集 (Points)
 
-
-
 点集由 vtkPoints 对象管理，存储所有顶点的三维几何坐标。从源码角度看：
-
-
 
 ```
 // vtkPolyData.h 中的关键定义
@@ -53,18 +37,11 @@ public:
 
 ```
 
-
 点集存储的是纯粹的几何信息，即顶点的三维坐标值。每个点有唯一的点ID，用于被拓扑结构引用。
-
-
 
 ##### 2.2 拓扑数据：单元组织
 
-
-
 vtkPolyData 通过四个独立的 vtkCellArray 管理拓扑连接关系：
-
-
 
 ```
 // vtkPolyData.h 中的单元数组声明
@@ -80,11 +57,7 @@ private:
 
 这是容易混淆的概念，需要从源码层面明确区分：
 
-
-
 **点集 (Points)**：存储几何坐标
-
-
 
 ```
 // 创建点集：仅存储坐标数据
@@ -96,10 +69,7 @@ points->InsertNextPoint(0.5, 1.0, 0.0);  // 点ID: 2
 
 ```
 
-
 **顶点单元 (Verts)**：定义点的拓扑组织
-
-
 
 ```
 // 创建顶点单元：定义如何将点组织为顶点
@@ -116,15 +86,11 @@ verts->InsertCellPoint(2);
 
 ```
 
-
 关键区别：点集存储"在哪里"（几何位置），顶点单元定义"哪些点组成哪些顶点"（拓扑连接）。
-
 
 2.2.2 线单元 (Lines)
 
 线单元连接两个或多个点形成线性结构：
-
-
 
 ```
 // 创建从点0到点1的线
@@ -138,8 +104,6 @@ lines->InsertCellPoint(1); // 终点
 2.2.3 多边形单元 (Polys)
 
 多边形单元连接多个点形成面结构：
-
-
 
 ```
 // 创建由点0、1、2组成的三角形
@@ -155,8 +119,6 @@ polys->InsertCellPoint(2);
 
 三角带是一种高效表示连续三角形的方式，通过顶点共享减少存储开销：
 
-
-
 ```
 // 创建三角带：使用4个点定义2个连续三角形
 vtkNew<vtkCellArray> strips;
@@ -168,14 +130,9 @@ strips->InsertCellPoint(3);  // 形成三角形(0,1,2)和(1,2,3)
 
 ```
 
-
 ##### 2.3 多类型单元协同工作机制
 
-
-
 在实际应用中，四种单元类型可以协同工作，共享同一套点集但表达不同层次的几何信息：
-
-
 
 ```
 // 创建包含多种单元类型的复杂PolyData
@@ -224,5 +181,5 @@ polyData->SetStrips(strips);
 
 ```
 
-
 理解 vtkPolyData 中各种单元类型的协同工作机制，对于开发高效的医学图像处理算法至关重要。正确使用这些数据结构能够优化内存使用、提高计算效率，并为后续的可视化和分析奠定坚实基础。
+

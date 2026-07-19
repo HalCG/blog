@@ -21,25 +21,62 @@ $$\min_{C, \mu} \sum_{k=1}^K \sum_{p_i \in C_k} \|p_i - \mu_k\|_2^2$$
 - $C_k \subset \{1, \ldots, N\}$ 是第 $k$ 个簇的点索引集合
 - $\mu_k \in \mathbb{R}^d$ 是第 $k$ 个簇的中心（质心）
 
-```
-  K-Means 的几何直观 (K=3, 2D 数据)
-
-  初始随机选择质心              迭代收敛后的结果
-
-     ○ ○ ○
-        ○  ●₁                   ┌───●₁───┐
-      ○  ○                      │  ○ ○ ○ │
-   ●₂         ○    ○            │    ○ ○  │
-         ○       ○              └─────────┘
-     ○    ○                     ┌───●₂───┐
-          ○          ●₃         │ ○ ○  ○ │
-     ○       ○   ○              │  ○   ○ ○│
-       ○   ○    ○               └─────────┘
-                                ┌───●₃───┐
-  ● = 质心                       │○ ○ ○ ○ │
-                                │ ○ ○  ○ │
-                                └─────────┘
-```
+<svg viewBox="0 0 600 200" width="100%" style="background-color: transparent; font-family: sans-serif; margin: 20px 0; overflow: visible;">
+  <!-- Left Side: Initial State -->
+  <g transform="translate(40, 20)">
+  <rect x="0" y="20" width="220" height="130" fill="rgba(100, 100, 100, 0.05)" stroke="var(--vp-c-divider)" stroke-width="1.5" rx="6" />
+  <text x="110" y="10" text-anchor="middle" font-size="13" fill="currentColor">初始随机质心</text>
+  <!-- Grey points -->
+  <g fill="var(--vp-c-text-3)" opacity="0.6">
+  <circle cx="30" cy="40" r="3" /><circle cx="45" cy="50" r="3" /><circle cx="35" cy="65" r="3" />
+  <circle cx="110" cy="90" r="3" /><circle cx="120" cy="110" r="3" /><circle cx="95" cy="100" r="3" />
+  <circle cx="180" cy="45" r="3" /><circle cx="160" cy="60" r="3" /><circle cx="170" cy="75" r="3" />
+  </g>
+  <!-- Centroids -->
+  <polygon points="50,40 52,47 59,48 54,53 56,60 50,56 44,60 46,53 41,48 48,47" fill="#f5222d" />
+  <text x="50" y="35" text-anchor="middle" font-size="9" fill="#f5222d">μ₁</text>
+  <polygon points="120,60 122,67 129,68 124,73 126,80 120,76 114,80 116,73 111,68 118,67" fill="#1677ff" />
+  <text x="120" y="55" text-anchor="middle" font-size="9" fill="#1677ff">μ₂</text>
+  <polygon points="150,110 152,117 159,118 154,123 156,130 150,126 144,130 146,123 141,118 148,117" fill="#52c41a" />
+  <text x="150" y="105" text-anchor="middle" font-size="9" fill="#52c41a">μ₃</text>
+  </g>
+  <!-- Arrow -->
+  <g transform="translate(285, 20)">
+  <line x1="0" y1="85" x2="30" y2="85" stroke="currentColor" stroke-width="2" marker-end="url(#kmeans-arrow)" />
+  </g>
+  <!-- Right Side: Converged State -->
+  <g transform="translate(340, 20)">
+  <rect x="0" y="20" width="220" height="130" fill="rgba(100, 100, 100, 0.05)" stroke="var(--vp-c-divider)" stroke-width="1.5" rx="6" />
+  <text x="110" y="10" text-anchor="middle" font-size="13" fill="currentColor">迭代收敛后的聚类</text>
+  <!-- Red Cluster -->
+  <g fill="#f5222d">
+  <circle cx="30" cy="40" r="3" /><circle cx="45" cy="50" r="3" /><circle cx="35" cy="65" r="3" />
+  <polygon points="36,45 38,52 45,53 40,58 42,65 36,61 30,65 32,58 27,53 34,52" fill="#f5222d" />
+  <text x="36" y="38" text-anchor="middle" font-size="9" fill="#f5222d">μ₁</text>
+  </g>
+  <!-- Blue Cluster -->
+  <g fill="#1677ff">
+  <circle cx="110" cy="90" r="3" /><circle cx="120" cy="110" r="3" /><circle cx="95" cy="100" r="3" />
+  <polygon points="108,95 110,102 117,103 112,108 114,115 108,111 102,115 104,108 99,103 106,102" fill="#1677ff" />
+  <text x="108" y="88" text-anchor="middle" font-size="9" fill="#1677ff">μ₂</text>
+  </g>
+  <!-- Green Cluster -->
+  <g fill="#52c41a">
+  <circle cx="180" cy="45" r="3" /><circle cx="160" cy="60" r="3" /><circle cx="170" cy="75" r="3" />
+  <polygon points="170,55 172,62 179,63 174,68 176,75 170,71 164,75 166,68 161,63 168,62" fill="#52c41a" />
+  <text x="170" y="48" text-anchor="middle" font-size="9" fill="#52c41a">μ₃</text>
+  </g>
+  <!-- Partition boundaries -->
+  <line x1="80" y1="20" x2="80" y2="150" stroke="currentColor" stroke-dasharray="3 3" opacity="0.3" />
+  <line x1="80" y1="80" x2="220" y2="80" stroke="currentColor" stroke-dasharray="3 3" opacity="0.3" />
+  </g>
+  <!-- Definition of arrow -->
+  <defs>
+  <marker id="kmeans-arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+  <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="currentColor" />
+  </marker>
+  </defs>
+</svg>
 
 ### 1.2 为什么是 $L_2$ 范数？
 
@@ -58,27 +95,13 @@ $$\implies \mu_k^* = \frac{1}{|C_k|} \sum_{p_i \in C_k} p_i$$
 
 K-Means 通过交替执行以下两步直到收敛：
 
-```
-  ┌─────────────────────────────────────────────────┐
-  │             K-Means Lloyd 迭代                    │
-  ├─────────────────────────────────────────────────┤
-  │                                                  │
-  │  初始化: 随机选择 K 个中心 {μ₁, ..., μ_K}        │
-  │                                                  │
-  │  ┌──────────────────────────────────────┐        │
-  │  │  while 中心变化 > ε:                   │        │
-  │  │                                       │        │
-  │  │    步骤 1 (Assignment):                │        │
-  │  │      将每个点分配给最近的中心           │        │
-  │  │      C_k = {i : k = arg min ||p_i-μ_j||}│       │
-  │  │                                       │        │
-  │  │    步骤 2 (Update):                    │        │
-  │  │      重新计算每个簇的中心               │        │
-  │  │      μ_k = (1/|C_k|) Σ_{i∈C_k} p_i    │        │
-  │  │                                       │        │
-  │  └──────────────────────────────────────┘        │
-  │                                                  │
-  └─────────────────────────────────────────────────┘
+```mermaid
+flowchart TD
+    A["初始化: 随机选择 K 个中心 {μ₁, ..., μ_K}"] --> B["步骤 1 (Assignment):<br/>将每个点分配给最近的中心"]
+    B --> C["步骤 2 (Update):<br/>重新计算每个簇的中心"]
+    C --> D{"中心变化 > ε ?"}
+    D -->|是| B
+    D -->|否| E["收敛结束"]
 ```
 
 ### 2.2 收敛性分析
@@ -321,20 +344,55 @@ def spatial_normal_kmeans(pcd, k=5, normal_weight=0.5):
 
 ### 5.1 主要局限性
 
-```
-  K-Means 失效场景
 
-  1. 非球形簇                    2. 大小悬殊的簇              3. 密度不均的簇
+<svg viewBox="0 0 600 220" width="100%" style="background-color: transparent; font-family: sans-serif; margin: 20px 0; overflow: visible;">
+  <!-- Non-spherical (Left) -->
+  <g transform="translate(10, 20)">
+  <rect x="0" y="20" width="170" height="130" fill="rgba(100, 100, 100, 0.05)" stroke="var(--vp-c-divider)" stroke-width="1.5" rx="6" />
+  <text x="85" y="10" text-anchor="middle" font-size="13" fill="currentColor">1. 非球形分布</text>
+  <circle cx="85" cy="80" r="18" fill="none" stroke="currentColor" stroke-dasharray="2 2" stroke-width="1.5" opacity="0.6" />
+  <circle cx="85" cy="80" r="42" fill="none" stroke="currentColor" stroke-dasharray="2 2" stroke-width="1.5" opacity="0.6" />
+  <line x1="85" y1="30" x2="85" y2="140" stroke="#f5222d" stroke-width="2" stroke-dasharray="4 4" />
+  <g opacity="0.8">
+  <circle cx="85" cy="62" r="3" fill="#f5222d" /><circle cx="67" cy="80" r="3" fill="#f5222d" /><circle cx="85" cy="98" r="3" fill="#f5222d" />
+  <circle cx="85" cy="38" r="3" fill="#f5222d" /><circle cx="43" cy="80" r="3" fill="#f5222d" /><circle cx="85" cy="122" r="3" fill="#f5222d" />
+  <circle cx="55" cy="50" r="3" fill="#f5222d" /><circle cx="55" cy="110" r="3" fill="#f5222d" />
+  <circle cx="103" cy="80" r="3" fill="#1677ff" />
+  <circle cx="127" cy="80" r="3" fill="#1677ff" />
+  <circle cx="115" cy="50" r="3" fill="#1677ff" /><circle cx="115" cy="110" r="3" fill="#1677ff" />
+  </g>
+  <text x="85" y="165" text-anchor="middle" font-size="11" fill="#f5222d">被直线割裂为半圆，无法识别环状</text>
+  </g>
+  <!-- Different Sizes (Middle) -->
+  <g transform="translate(205, 20)">
+  <rect x="0" y="20" width="170" height="130" fill="rgba(100, 100, 100, 0.05)" stroke="var(--vp-c-divider)" stroke-width="1.5" rx="6" />
+  <text x="85" y="10" text-anchor="middle" font-size="13" fill="currentColor">2. 尺寸悬殊</text>
+  <circle cx="50" cy="80" r="35" fill="none" stroke="currentColor" stroke-dasharray="2 2" stroke-width="1.5" opacity="0.3" />
+  <circle cx="130" cy="80" r="10" fill="none" stroke="currentColor" stroke-dasharray="2 2" stroke-width="1.5" opacity="0.3" />
+  <line x1="95" y1="30" x2="95" y2="140" stroke="#f5222d" stroke-width="2" stroke-dasharray="4 4" />
+  <circle cx="30" cy="70" r="3" fill="#f5222d" /><circle cx="45" cy="90" r="3" fill="#f5222d" /><circle cx="55" cy="60" r="3" fill="#f5222d" />
+  <circle cx="35" cy="85" r="3" fill="#f5222d" /><circle cx="65" cy="75" r="3" fill="#f5222d" />
+  <circle cx="80" cy="75" r="3" fill="#1677ff" /><circle cx="85" cy="90" r="3" fill="#1677ff" />
+  <circle cx="125" cy="78" r="3" fill="#1677ff" /><circle cx="133" cy="83" r="3" fill="#1677ff" /><circle cx="130" cy="74" r="3" fill="#1677ff" />
+  <text x="85" y="165" text-anchor="middle" font-size="11" fill="#f5222d">大簇的一部分被错分给小簇</text>
+  </g>
+  <!-- Different Densities (Right) -->
+  <g transform="translate(400, 20)">
+  <rect x="0" y="20" width="190" height="130" fill="rgba(100, 100, 100, 0.05)" stroke="var(--vp-c-divider)" stroke-width="1.5" rx="6" />
+  <text x="95" y="10" text-anchor="middle" font-size="13" fill="currentColor">3. 密度分布不均</text>
+  <circle cx="40" cy="80" r="15" fill="none" stroke="currentColor" stroke-dasharray="2 2" stroke-width="1.5" opacity="0.3" />
+  <circle cx="130" cy="80" r="35" fill="none" stroke="currentColor" stroke-dasharray="2 2" stroke-width="1.5" opacity="0.3" />
+  <line x1="85" y1="30" x2="85" y2="140" stroke="#f5222d" stroke-width="2" stroke-dasharray="4 4" />
+  <circle cx="35" cy="75" r="2.5" fill="#f5222d" /><circle cx="45" cy="85" r="2.5" fill="#f5222d" />
+  <circle cx="40" cy="72" r="2.5" fill="#f5222d" /><circle cx="32" cy="82" r="2.5" fill="#f5222d" />
+  <circle cx="46" cy="76" r="2.5" fill="#f5222d" />
+  <circle cx="75" cy="70" r="2.5" fill="#f5222d" /><circle cx="80" cy="90" r="2.5" fill="#f5222d" />
+  <circle cx="110" cy="65" r="2.5" fill="#1677ff" /><circle cx="130" cy="95" r="2.5" fill="#1677ff" />
+  <circle cx="150" cy="70" r="2.5" fill="#1677ff" /><circle cx="140" cy="85" r="2.5" fill="#1677ff" />
+  <text x="95" y="165" text-anchor="middle" font-size="11" fill="#f5222d">稀疏簇边缘点被硬分配给密集簇</text>
+  </g>
+</svg>
 
-      ●●●                           ○ ○ ○
-    ●●   ●●                       ○       ○                     ○○
-   ●       ●                      ○   ●   ○ ●●             ○  ○○  ○
-    ●●   ●●                       ○       ○  ●●●           ○ ○ ○  ○ ○
-      ●●●                           ○ ○ ○                     ○○
-                                                           ○ ○○○○○○○ ○
-  实际: 两圈                     K-Means:                   实际: 2 簇
-  K-Means: 一堆奇怪的对角线划分     大簇被拆分                  K-Means: 错误切分
-```
 
 ### 5.2 改进方向
 
@@ -350,21 +408,32 @@ def spatial_normal_kmeans(pcd, k=5, normal_weight=0.5):
 
 如何选择 $K$？画出 WCSS 随 $K$ 变化的曲线：
 
-```
-  WCSS ▲
-       │
-       │ ╲
-       │  ╲
-       │   ╲___ ← 肘部 (最佳 K)
-       │       ╲___
-       │           ╲_____
-       │                  ╲_________
-       └────┬────┬────┬────┬────┬────► K
-            1    2    3    4    5    6
 
-  肘部之前 WCSS 快速下降（每个新簇捕获了新结构）
-  肘部之后 WCSS 缓慢下降（过度分割，只是分裂自然簇）
-```
+<svg viewBox="0 0 500 220" width="100%" style="background-color: transparent; font-family: sans-serif; margin: 20px 0; overflow: visible;">
+  <line x1="50" y1="180" x2="450" y2="180" stroke="currentColor" stroke-width="1.5" marker-end="url(#elbow-axis-arrow)" />
+  <text x="460" y="184" font-size="12" fill="currentColor">K (簇数)</text>
+  <line x1="50" y1="180" x2="50" y2="25" stroke="currentColor" stroke-width="1.5" marker-end="url(#elbow-axis-arrow)" />
+  <text x="45" y="15" font-size="12" fill="currentColor" text-anchor="middle">WCSS (簇内平方和)</text>
+  <path d="M 80,45 L 140,85 L 200,135 L 260,150 L 320,158 L 380,163" fill="none" stroke="#1677ff" stroke-width="2.5" />
+  <circle cx="80" cy="45" r="4" fill="#1677ff" /><text x="80" y="195" text-anchor="middle" font-size="10" fill="var(--vp-c-text-2)">1</text>
+  <circle cx="140" cy="85" r="4" fill="#1677ff" /><text x="140" y="195" text-anchor="middle" font-size="10" fill="var(--vp-c-text-2)">2</text>
+  <circle cx="200" cy="135" r="5" fill="#f5222d" /><text x="200" y="195" text-anchor="middle" font-size="10" fill="#f5222d">3</text>
+  <circle cx="260" cy="150" r="4" fill="#1677ff" /><text x="260" y="195" text-anchor="middle" font-size="10" fill="var(--vp-c-text-2)">4</text>
+  <circle cx="320" cy="158" r="4" fill="#1677ff" /><text x="320" y="195" text-anchor="middle" font-size="10" fill="var(--vp-c-text-2)">5</text>
+  <circle cx="380" cy="163" r="4" fill="#1677ff" /><text x="380" y="195" text-anchor="middle" font-size="10" fill="var(--vp-c-text-2)">6</text>
+  <path d="M 270,105 L 210,130" fill="none" stroke="#f5222d" stroke-width="1.5" marker-end="url(#elbow-callout-arrow)" />
+  <rect x="265" y="85" width="115" height="28" rx="4" fill="rgba(245, 34, 45, 0.08)" stroke="#f5222d" stroke-width="1" />
+  <text x="322" y="102" text-anchor="middle" font-size="11" fill="#f5222d">肘部 (最佳 K = 3)</text>
+  <defs>
+  <marker id="elbow-axis-arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+  <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="currentColor" />
+  </marker>
+  <marker id="elbow-callout-arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+  <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#f5222d" />
+  </marker>
+  </defs>
+</svg>
+
 
 ```python
 def elbow_method(points, k_range=range(1, 11)):
